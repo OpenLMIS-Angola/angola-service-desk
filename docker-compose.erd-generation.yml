@@ -1,0 +1,13 @@
+version: "2"
+services:
+
+  service-desk:
+    image: openlmisao/service-desk
+    links:
+      - log
+    env_file: .env
+
+  log:
+    image: openlmis/rsyslog:1
+    volumes:
+      - '../logs/service-desk:/var/log'

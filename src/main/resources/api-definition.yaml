@@ -1,0 +1,68 @@
+#%RAML 0.8
+---
+title: OpenLMIS Angola Service Desk API
+version: "@version@"
+baseUri: "@baseUrl@"
+protocols: [ HTTP, HTTPS ]
+
+documentation:
+- title: Getting Started
+  content: Welcome to the OpenLMIS Service Desk documentation.
+
+schemas:
+- localizedErrorResponse: !include schemas/localizedErrorResponse.json
+
+- version: !include schemas/version.json
+
+- issue: !include schemas/issue.json
+
+traits:
+- secured:
+    queryParameters:
+      access_token:
+        displayName: access_token
+        description: OAuth2 access token
+        type: string
+        required: false
+        repeat: false
+    headers:
+      Authorization:
+        displayName: Authorization
+        description: OAuth2 authorization token header. Takes the form of 'Bearer <token>'.
+        type: string
+        required: false
+        repeat: false
+
+/serviceDesk:
+  displayName: Version
+  get:
+    description: Get version
+    responses:
+      200:
+        description: Returns version information.
+        headers:
+        body:
+          application/json:
+            schema: version
+
+/api:
+  /issue:
+    displayName: widgets
+    post:
+      is: [ secured ]
+      description: Sends issue to Service Desk Jira API.
+      body:
+        application/json:
+          schema: issue
+      responses:
+        201:
+          body:
+            application/json:
+              schema: issue
+        400:
+          body:
+            application/json:
+              schema: localizedErrorResponse
+        401:
+          body:
+            application/json:
