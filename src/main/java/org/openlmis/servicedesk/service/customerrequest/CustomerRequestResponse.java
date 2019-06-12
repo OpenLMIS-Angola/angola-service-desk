@@ -15,11 +15,12 @@
 
 package org.openlmis.servicedesk.service.customerrequest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.codehaus.jackson.annotate.JsonProperty;
+
 
 @Data
 @AllArgsConstructor
