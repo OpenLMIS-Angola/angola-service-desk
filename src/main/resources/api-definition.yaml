@@ -33,7 +33,7 @@ traits:
         required: false
         repeat: false
 
-/serviceDesk:
+/servicedesk:
   displayName: Version
   get:
     description: Get version
