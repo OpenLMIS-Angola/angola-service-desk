@@ -49,7 +49,7 @@ public class CustomerRequestService extends BaseCommunicationService<CustomerReq
    */
   @SuppressWarnings("PMD.PreserveStackTrace")
   public ResponseEntity<CustomerRequestResponse> submit(CustomerRequest customerRequest) {
-    LOGGER.debug("Creating customer request using Service Desk API: {}", customerRequest);
+    LOGGER.info("Creating customer request using Service Desk API: {}", customerRequest);
 
     String url = serviceDeskUrl + "/request";
 
@@ -62,6 +62,7 @@ public class CustomerRequestService extends BaseCommunicationService<CustomerReq
               CustomerRequestResponse.class
           ));
     } catch (HttpStatusCodeException ex) {
+      LOGGER.error("Sending customer request to Service Desk API failed: {}", ex);
       throw buildDataRetrievalException(ex);
     }
   }
