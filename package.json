@@ -1,5 +1,5 @@
 {
-  "name": "openlmis-template",
+  "name": "service-desk",
   "version": "0.0.1",
   "devDependencies": {
     "raml2html": "~2.4.0"

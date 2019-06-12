@@ -46,8 +46,8 @@ traits:
             schema: version
 
 /api:
-  /issue:
-    displayName: widgets
+  /issues:
+    displayName: Issues
     post:
       is: [ secured ]
       description: Sends issue to Service Desk Jira API.

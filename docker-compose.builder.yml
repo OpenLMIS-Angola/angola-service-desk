@@ -6,7 +6,6 @@ services:
       - log
     volumes:
       - '.:/app'
-      - '../logback.xml:/logback.xml'
     command:
       - './build.sh'
     environment:
