@@ -15,7 +15,6 @@
 
 package org.openlmis.servicedesk.service.customerrequest;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
@@ -26,7 +25,6 @@ import static org.mockito.Mockito.verify;
 
 import java.net.URI;
 import java.util.Base64;
-import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.servicedesk.service.BaseCommunicationService;

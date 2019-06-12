@@ -18,16 +18,9 @@ package org.openlmis.servicedesk.service;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
@@ -38,7 +31,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -59,11 +51,9 @@ public abstract class BaseCommunicationServiceTest<T> {
   @Captor
   protected ArgumentCaptor<HttpEntity> entityCaptor;
 
-  private BaseCommunicationService<T> service;
-
   @Before
   public void setUp() {
-    service = prepareService();
+    prepareService();
   }
 
   protected abstract T generateInstance();
