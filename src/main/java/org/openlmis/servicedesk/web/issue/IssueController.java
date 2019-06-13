@@ -24,10 +24,10 @@ import org.openlmis.servicedesk.service.customerrequest.CustomerRequestResponse;
 import org.openlmis.servicedesk.service.customerrequest.CustomerRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -70,7 +70,7 @@ public class IssueController {
   @ResponseBody
   @ResponseStatus(HttpStatus.OK)
   public void upload(@RequestPart("file") MultipartFile file,
-      @RequestParam int issueId) {
+      @PathVariable int issueId) {
     TemporaryAttachmentResponse response = attachmentService.attachTemporaryFile(file).getBody();
     attachmentService.createAttachment(
         new AttachmentRequest(response.findAttachment(file.getName()).getTemporaryAttachmentId()),
