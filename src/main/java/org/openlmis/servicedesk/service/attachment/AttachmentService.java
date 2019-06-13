@@ -13,11 +13,12 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.servicedesk.service.customerrequest;
+package org.openlmis.servicedesk.service.attachment;
 
 import static org.openlmis.servicedesk.util.RequestHelper.createUri;
 
 import org.openlmis.servicedesk.service.BaseCommunicationService;
+import org.openlmis.servicedesk.service.customerrequest.CustomerRequestResponse;
 import org.openlmis.servicedesk.util.RequestHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +27,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
-public class CustomerRequestService extends BaseCommunicationService<CustomerRequest> {
+public class AttachmentService extends BaseCommunicationService<AttachmentRequest> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRequestService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentService.class);
 
   @Value("${serviceDeskApi.url}")
   private String serviceDeskUrl;
+
+  @Value("${serviceDeskApi.serviceDeskId}")
+  private String serviceDeskId;
 
   @Value("${serviceDeskApi.userEmail}")
   private String userEmail;
@@ -42,22 +47,52 @@ public class CustomerRequestService extends BaseCommunicationService<CustomerReq
   private String token;
 
   /**
-   * Submits Customer Requests to Service Desk API.
+   * Attaches temporary file to Service Desk.
    *
-   * @param  customerRequest request to be send
-   * @return                 Service Desk response
+   * @param multipartFile file to be attached
+   * @return              temporary attachment response
    */
-  public ResponseEntity<CustomerRequestResponse> submit(CustomerRequest customerRequest) {
-    LOGGER.info("Creating customer request using Service Desk API: {}", customerRequest);
+  public ResponseEntity<TemporaryAttachmentResponse> attachTemporaryFile(
+      MultipartFile multipartFile) {
+    LOGGER.info("Creating temporary attachment using Service Desk API: {}",
+        multipartFile.getName());
 
-    String url = serviceDeskUrl + "/request";
+    String url = String.format("%s/servicedesk/%s/attachTemporaryFile",
+        serviceDeskUrl, serviceDeskId);
 
     try {
       return runWithRetry(() ->
           restTemplate.exchange(
               createUri(url),
               HttpMethod.POST,
-              RequestHelper.createEntity(customerRequest, String.format("%s:%s", userEmail, token)),
+              RequestHelper.createEntity(
+                  multipartFile, String.format("%s:%s", userEmail, token), true),
+              TemporaryAttachmentResponse.class
+          ));
+    } catch (HttpStatusCodeException ex) {
+      LOGGER.error("Creating temporary attachment in Service Desk failed: {}",
+          ex.getResponseBodyAsString());
+      throw buildDataRetrievalException(ex);
+    }
+  }
+
+  /**
+   * Attaches file to Service Desk issue.
+   *
+   * @param attachmentRequest request to be send
+   */
+  public void createAttachment(AttachmentRequest attachmentRequest, int issueId) {
+    LOGGER.info("Attaching file to issue using Service Desk API: {}", attachmentRequest);
+
+    String url = String.format("%s/request/%s/attachment", serviceDeskUrl, issueId);
+
+    try {
+      runWithRetry(() ->
+          restTemplate.exchange(
+              createUri(url),
+              HttpMethod.POST,
+              RequestHelper.createEntity(attachmentRequest,
+                  String.format("%s:%s", userEmail, token)),
               CustomerRequestResponse.class
           ));
     } catch (HttpStatusCodeException ex) {
@@ -68,8 +103,8 @@ public class CustomerRequestService extends BaseCommunicationService<CustomerReq
   }
 
   @Override
-  protected Class<CustomerRequest> getResultClass() {
-    return CustomerRequest.class;
+  protected Class<AttachmentRequest> getResultClass() {
+    return AttachmentRequest.class;
   }
 
   @Override

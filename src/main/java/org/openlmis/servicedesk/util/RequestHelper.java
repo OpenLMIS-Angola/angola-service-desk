@@ -67,30 +67,49 @@ public final class RequestHelper {
   /**
    * Creates an {@link HttpEntity} with the given payload as a body and adds an authorization
    * header with the provided token.
-   * @param payload the body of the request, pass null if no body
-   * @param token the token to put into the authorization header
-   * @param <E> the type of the body for the request
-   * @return the {@link HttpEntity} to use
+   *
+   * @param payload   the body of the request, pass null if no body
+   * @param token     the token to put into the authorization header
+   * @param <E>       the type of the body for the request
+   * @param multipart if true multipart/form-data header will be set, otherwise application/json
+   * @return          the {@link HttpEntity} to use
    */
-  public static <E> HttpEntity<E> createEntity(E payload, String token) {
+  public static <E> HttpEntity<E> createEntity(E payload, String token, boolean multipart) {
     if (payload == null) {
       return createEntity(token);
     } else {
-      return new HttpEntity<>(payload, createHeadersWithAuth(token));
+      return new HttpEntity<>(payload, createHeadersWithAuth(token, multipart));
     }
+  }
+
+  /**
+   * Creates an {@link HttpEntity} with the given payload as a body and adds an authorization
+   * header with the provided token.
+   *
+   * @param payload   the body of the request, pass null if no body
+   * @param token     the token to put into the authorization header
+   * @param <E>       the type of the body for the request
+   * @return          the {@link HttpEntity} to use
+   */
+  public static <E> HttpEntity<E> createEntity(E payload, String token) {
+    return createEntity(payload, token, false);
   }
 
   public static <E> HttpEntity<E> createEntity(String token) {
     return new HttpEntity<>(createHeadersWithAuth(token));
   }
 
-  private static HttpHeaders createHeadersWithAuth(String credentials) {
+  private static HttpHeaders createHeadersWithAuth(String credentials, boolean multipart) {
     HttpHeaders headers = new HttpHeaders();
-    headers.setAccept(singletonList(MediaType.APPLICATION_JSON));
-    headers.setContentType(MediaType.APPLICATION_JSON);
+    MediaType type = multipart ? MediaType.MULTIPART_FORM_DATA : MediaType.APPLICATION_JSON;
+    headers.setAccept(singletonList(type));
+    headers.setContentType(type);
     String encodedString = Base64.getEncoder().encodeToString(credentials.getBytes());
     headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedString);
     return headers;
   }
 
+  private static HttpHeaders createHeadersWithAuth(String credentials) {
+    return createHeadersWithAuth(credentials, false);
+  }
 }

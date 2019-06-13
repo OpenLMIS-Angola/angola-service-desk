@@ -13,27 +13,15 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.servicedesk.i18n;
+package org.openlmis.servicedesk.service.attachment;
 
-import java.util.Arrays;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public abstract class MessageKeys {
-
-  private static final String DELIMITER = ".";
-
-  private static final String SERVICE_PREFIX = "serviceDesk";
-  private static final String ERROR_PREFIX = join(SERVICE_PREFIX, "error");
-
-  public static final String ERROR_SERVICE_REQUIRED = ERROR_PREFIX + ".service.required";
-  public static final String ERROR_SERVICE_OCCURED = ERROR_PREFIX + ".service.errorOccured";
-
-  public static final String ATTACHMENT_NOT_FOUND = ERROR_PREFIX + ".attachment.notFound";
-
-  private MessageKeys() {
-    throw new UnsupportedOperationException();
-  }
-
-  private static String join(String... params) {
-    return String.join(DELIMITER, Arrays.asList(params));
-  }
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public final class AdditionalComment {
+  private String body;
 }

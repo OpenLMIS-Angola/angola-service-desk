@@ -13,27 +13,32 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.servicedesk.i18n;
+package org.openlmis.servicedesk.service.attachment;
 
-import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public abstract class MessageKeys {
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class AttachmentRequest {
+  private List<String> temporaryAttachmentIds;
+  @JsonProperty("public")
+  private boolean isPublic;
+  private AdditionalComment additionalComment;
 
-  private static final String DELIMITER = ".";
-
-  private static final String SERVICE_PREFIX = "serviceDesk";
-  private static final String ERROR_PREFIX = join(SERVICE_PREFIX, "error");
-
-  public static final String ERROR_SERVICE_REQUIRED = ERROR_PREFIX + ".service.required";
-  public static final String ERROR_SERVICE_OCCURED = ERROR_PREFIX + ".service.errorOccured";
-
-  public static final String ATTACHMENT_NOT_FOUND = ERROR_PREFIX + ".attachment.notFound";
-
-  private MessageKeys() {
-    throw new UnsupportedOperationException();
-  }
-
-  private static String join(String... params) {
-    return String.join(DELIMITER, Arrays.asList(params));
+  /**
+   * Creates attachment request with single temporary attachment id.
+   *
+   * @param temporaryAttachmentId temporary attachment id
+   */
+  public AttachmentRequest(String temporaryAttachmentId) {
+    isPublic = true;
+    temporaryAttachmentIds = new ArrayList<>();
+    temporaryAttachmentIds.add(temporaryAttachmentId);
   }
 }
