@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,13 +62,16 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
     String url = String.format("%s/servicedesk/%s/attachTemporaryFile",
         serviceDeskUrl, serviceDeskId);
 
+    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+    body.add("file", multipartFile);
+
     try {
       return runWithRetry(() ->
           restTemplate.exchange(
               createUri(url),
               HttpMethod.POST,
               RequestHelper.createEntity(
-                  multipartFile, String.format("%s:%s", userEmail, token), true),
+                  body, String.format("%s:%s", userEmail, token), true),
               TemporaryAttachmentResponse.class
           ));
     } catch (HttpStatusCodeException ex) {
