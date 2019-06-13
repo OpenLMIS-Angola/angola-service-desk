@@ -66,3 +66,26 @@ traits:
         401:
           body:
             application/json:
+    /{issueId}/attachment:
+      post:
+        is: [ secured ]
+        description: Sends attachment for issue to Service Desk Jira API.
+        body:
+          multipart/form-data:
+            formParameters:
+              file:
+                 displayName: File attachment
+                 type: file
+                 required: true
+                 repeat: false
+        responses:
+          201:
+            body:
+              application/json:
+          400:
+            body:
+              application/json:
+                schema: localizedErrorResponse
+          401:
+            body:
+              application/json:
