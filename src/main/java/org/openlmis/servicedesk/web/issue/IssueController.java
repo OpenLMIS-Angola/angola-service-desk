@@ -66,7 +66,7 @@ public class IssueController {
    * @param file    File to be attached
    * @param issueId Issue that file will be attached to
    */
-  @PostMapping("{issueId}")
+  @PostMapping("{issueId}/attachment")
   @ResponseBody
   @ResponseStatus(HttpStatus.OK)
   public void upload(@RequestPart("file") MultipartFile file,
