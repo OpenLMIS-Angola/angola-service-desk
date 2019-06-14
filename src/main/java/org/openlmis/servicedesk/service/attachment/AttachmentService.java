@@ -15,13 +15,18 @@
 
 package org.openlmis.servicedesk.service.attachment;
 
+import static org.openlmis.servicedesk.i18n.MessageKeys.ATTACHMENT_FAILED_TO_READ;
 import static org.openlmis.servicedesk.util.RequestHelper.createUri;
 
+import java.io.IOException;
+import javax.xml.bind.ValidationException;
+import org.openlmis.servicedesk.exception.ValidationMessageException;
 import org.openlmis.servicedesk.service.BaseCommunicationService;
 import org.openlmis.servicedesk.util.RequestHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -61,22 +66,25 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
     String url = String.format("%s/servicedesk/%s/createTemporaryFile",
         serviceDeskUrl, serviceDeskId);
 
-    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    body.add("file", multipartFile);
-
+    MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
     try {
+      formData .add("file", new ByteArrayResource(multipartFile.getBytes()));
       return runWithRetry(() ->
           restTemplate.exchange(
               createUri(url),
               HttpMethod.POST,
               RequestHelper.createEntity(
-                  body, String.format("%s:%s", userEmail, token), true),
+                  formData, String.format("%s:%s", userEmail, token), true),
               TemporaryAttachmentResponse.class
           ));
     } catch (HttpStatusCodeException ex) {
       LOGGER.error("Creating temporary attachment in Service Desk failed: {}",
           ex.getResponseBodyAsString());
       throw buildDataRetrievalException(ex);
+    } catch (IOException ex) {
+      LOGGER.error("Creating temporary attachment in Service Desk failed: {}",
+          ex.getLocalizedMessage());
+      throw new ValidationMessageException(ex, ATTACHMENT_FAILED_TO_READ);
     }
   }
 
