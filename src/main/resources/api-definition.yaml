@@ -80,8 +80,6 @@ traits:
                  repeat: false
         responses:
           201:
-            body:
-              application/json:
           400:
             body:
               application/json:

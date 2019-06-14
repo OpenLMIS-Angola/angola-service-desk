@@ -15,24 +15,33 @@
 
 package org.openlmis.servicedesk.service.customerrequest;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
-import org.junit.Test;
-import org.openlmis.servicedesk.ToStringTestUtils;
+import java.util.HashMap;
+import java.util.Map;
 
-public class StatusTest {
+public class RequestFieldDataBuilder {
 
-  @Test
-  public void equalsContract() {
-    EqualsVerifier
-        .forClass(Status.class)
-        .suppress(Warning.NONFINAL_FIELDS)
-        .verify();
+  private static int instanceNumber = 0;
+
+  private String fieldId;
+  private String label;
+  // this could be either List or String, we are not using this value so we can simply use Object
+  private Object value;
+  private Map<String, String> renderedValue;
+
+  /**
+   * Constructor for {@link RequestFieldDataBuilder}.
+   * Sets default values for new instance of {@link RequestField} class.
+   */
+  public RequestFieldDataBuilder() {
+    instanceNumber++;
+
+    fieldId = String.valueOf(instanceNumber);
+    label = "field" + instanceNumber;
+    value = instanceNumber;
+    renderedValue = new HashMap<>();
   }
 
-  @Test
-  public void shouldImplementToString() {
-    Status status = new StatusDataBuilder().build();
-    ToStringTestUtils.verify(Status.class, status);
+  public RequestField build() {
+    return new RequestField(fieldId, label, value, renderedValue);
   }
 }

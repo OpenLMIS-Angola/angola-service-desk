@@ -32,7 +32,7 @@ public class CustomFieldTest {
 
   @Test
   public void shouldImplementToString() {
-    CustomField customField = new CustomField();
+    CustomField customField = new CustomField("1");
     ToStringTestUtils.verify(CustomField.class, customField);
   }
 }

@@ -13,26 +13,28 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.servicedesk.service.customerrequest;
+package org.openlmis.servicedesk.service.attachment;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
-import org.junit.Test;
-import org.openlmis.servicedesk.ToStringTestUtils;
+import java.util.ArrayList;
+import java.util.List;
 
-public class StatusTest {
+public class AttachmentRequestDataBuilder {
 
-  @Test
-  public void equalsContract() {
-    EqualsVerifier
-        .forClass(Status.class)
-        .suppress(Warning.NONFINAL_FIELDS)
-        .verify();
+  private List<String> temporaryAttachmentIds;
+  private boolean isPublic;
+  private AdditionalComment additionalComment;
+
+  /**
+   * Constructor for {@link AttachmentRequestDataBuilder}.
+   * Sets default values for new instance of {@link AttachmentRequest} class.
+   */
+  public AttachmentRequestDataBuilder() {
+    temporaryAttachmentIds = new ArrayList<>();
+    isPublic = true;
+    additionalComment = new AdditionalCommentDataBuilder().build();
   }
 
-  @Test
-  public void shouldImplementToString() {
-    Status status = new StatusDataBuilder().build();
-    ToStringTestUtils.verify(Status.class, status);
+  public AttachmentRequest build() {
+    return new AttachmentRequest(temporaryAttachmentIds, isPublic, additionalComment);
   }
 }

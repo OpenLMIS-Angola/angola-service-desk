@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.servicedesk.service.customerrequest;
+package org.openlmis.servicedesk.service.attachment;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -30,32 +30,33 @@ import org.openlmis.servicedesk.util.RequestHelper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
-public class CustomerRequestServiceTest extends BaseCommunicationServiceTest<CustomerRequest> {
+public class AttachmentServiceTest extends BaseCommunicationServiceTest<AttachmentRequest> {
 
   private static final String serviceDeskUrl =
       "https://openlmis.atlassian.net/rest/servicedeskapi";
+  private static final String serviceDeskId = "1";
   private static final String userEmail = "user@siglofa.com";
   private static final String token = "token";
 
-  private CustomerRequestService service;
+  private AttachmentService service;
 
-  private CustomerRequest customerRequest;
-  private CustomerRequestResponse customerRequestResponse =
-      new CustomerRequestResponseDataBuilder().build();
   private String encodedString;
 
   @Before
   public void setUp() {
     super.setUp();
-    service = (CustomerRequestService) prepareService();
+    service = (AttachmentService) prepareService();
 
     ReflectionTestUtils.setField(service, "serviceDeskUrl", serviceDeskUrl);
+    ReflectionTestUtils.setField(service, "serviceDeskId", serviceDeskId);
     ReflectionTestUtils.setField(service, "userEmail", userEmail);
     ReflectionTestUtils.setField(service, "token", token);
-
-    customerRequest = generateInstance();
 
     encodedString = Base64.getEncoder()
         .encodeToString(String.format("%s:%s", userEmail, token).getBytes());
@@ -63,25 +64,52 @@ public class CustomerRequestServiceTest extends BaseCommunicationServiceTest<Cus
 
   @Test
   public void shouldSubmitCustomerRequest() {
+    TemporaryAttachmentResponse expectedResponse =
+        new TemporaryAttachmentResponseDataBuilder().build();
+    MultipartFile multipartFile = new MockMultipartFile("file", "some-text".getBytes());
+    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+    body.add("file", multipartFile);
+
     given(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class),
-        any(Class.class))).willReturn(ResponseEntity.ok(customerRequestResponse));
+        any(Class.class))).willReturn(ResponseEntity.ok(expectedResponse));
 
-    CustomerRequestResponse response = service.submit(customerRequest).getBody();
+    TemporaryAttachmentResponse response = service.createTemporaryFile(multipartFile).getBody();
 
-    verifyRequest(1, CustomerRequestResponse.class);
-    assertEquals(customerRequestResponse, response);
-    assertEquals(RequestHelper.createUri(serviceDeskUrl + "/request"), uriCaptor.getValue());
+    verifyRequest(1, TemporaryAttachmentResponse.class);
+    assertEquals(expectedResponse, response);
+    assertEquals(RequestHelper.createUri(
+        String.format("%s/servicedesk/%s/createTemporaryFile", serviceDeskUrl, serviceDeskId)),
+        uriCaptor.getValue());
     assertNotNull(entityCaptor.getValue().getBody());
-    assertEquals(customerRequest, entityCaptor.getValue().getBody());
+    assertEquals(body, entityCaptor.getValue().getBody());
+    assertAuthHeader(entityCaptor.getValue(), encodedString);
+  }
+
+  @Test
+  public void shouldCreateAttachment() {
+    int issueId = 1;
+    AttachmentRequest attachmentRequest = generateInstance();
+
+    given(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class),
+        any(Class.class))).willReturn(ResponseEntity.ok("OK"));
+
+    service.createAttachment(attachmentRequest, issueId);
+
+    verifyRequest(1, Object.class);
+    assertEquals(RequestHelper.createUri(
+        String.format("%s/request/%s/attachment", serviceDeskUrl, issueId)),
+        uriCaptor.getValue());
+    assertNotNull(entityCaptor.getValue().getBody());
+    assertEquals(attachmentRequest, entityCaptor.getValue().getBody());
     assertAuthHeader(entityCaptor.getValue(), encodedString);
   }
 
   @Override
-  protected CustomerRequest generateInstance() {
-    return new CustomerRequestDataBuilder().build();
+  protected AttachmentRequest generateInstance() {
+    return new AttachmentRequestDataBuilder().build();
   }
 
-  protected BaseCommunicationService<CustomerRequest> getService() {
-    return new CustomerRequestService();
+  protected BaseCommunicationService<AttachmentRequest> getService() {
+    return new AttachmentService();
   }
 }

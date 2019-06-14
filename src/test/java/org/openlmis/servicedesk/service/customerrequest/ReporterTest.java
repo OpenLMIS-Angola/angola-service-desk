@@ -32,7 +32,7 @@ public class ReporterTest {
 
   @Test
   public void shouldImplementToString() {
-    Reporter reporter = new Reporter();
+    Reporter reporter = new ReporterDataBuilder().build();
     ToStringTestUtils.verify(Reporter.class, reporter);
   }
 }

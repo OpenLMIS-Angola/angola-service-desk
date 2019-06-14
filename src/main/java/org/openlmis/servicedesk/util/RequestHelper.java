@@ -102,8 +102,8 @@ public final class RequestHelper {
   private static HttpHeaders createHeadersWithAuth(String credentials, boolean multipart) {
     HttpHeaders headers = new HttpHeaders();
     MediaType type = multipart ? MediaType.MULTIPART_FORM_DATA : MediaType.APPLICATION_JSON;
-    headers.setAccept(singletonList(type));
     headers.setContentType(type);
+    headers.setAccept(singletonList(MediaType.APPLICATION_JSON));
     String encodedString = Base64.getEncoder().encodeToString(credentials.getBytes());
     headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedString);
     return headers;

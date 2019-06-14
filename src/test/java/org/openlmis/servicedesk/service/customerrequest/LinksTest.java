@@ -32,7 +32,7 @@ public class LinksTest {
 
   @Test
   public void shouldImplementToString() {
-    Links links = new Links();
+    Links links = new LinksDataBuilder().build();
     ToStringTestUtils.verify(Links.class, links);
   }
 }

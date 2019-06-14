@@ -18,6 +18,9 @@ package org.openlmis.servicedesk.service;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.net.URI;
 import java.util.List;
@@ -31,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -71,5 +75,10 @@ public abstract class BaseCommunicationServiceTest<T> {
 
     assertThat(authorization, hasSize(1));
     assertThat(authorization, hasItem(TOKEN_HEADER + token));
+  }
+
+  protected void verifyRequest(int times, Class requestType) {
+    verify(restTemplate, times(times)).exchange(uriCaptor.capture(), eq(HttpMethod.POST),
+        entityCaptor.capture(), eq(requestType));
   }
 }

@@ -18,7 +18,6 @@ package org.openlmis.servicedesk.service.attachment;
 import static org.openlmis.servicedesk.util.RequestHelper.createUri;
 
 import org.openlmis.servicedesk.service.BaseCommunicationService;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequestResponse;
 import org.openlmis.servicedesk.util.RequestHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,12 +53,12 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
    * @param multipartFile file to be attached
    * @return              temporary attachment response
    */
-  public ResponseEntity<TemporaryAttachmentResponse> attachTemporaryFile(
+  public ResponseEntity<TemporaryAttachmentResponse> createTemporaryFile(
       MultipartFile multipartFile) {
-    LOGGER.info("Creating temporary attachment using Service Desk API: {}",
+    LOGGER.error("Creating temporary attachment using Service Desk API: {}",
         multipartFile.getName());
 
-    String url = String.format("%s/servicedesk/%s/attachTemporaryFile",
+    String url = String.format("%s/servicedesk/%s/createTemporaryFile",
         serviceDeskUrl, serviceDeskId);
 
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -87,7 +86,7 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
    * @param attachmentRequest request to be send
    */
   public void createAttachment(AttachmentRequest attachmentRequest, int issueId) {
-    LOGGER.info("Attaching file to issue using Service Desk API: {}", attachmentRequest);
+    LOGGER.error("Attaching file to issue using Service Desk API: {}", attachmentRequest);
 
     String url = String.format("%s/request/%s/attachment", serviceDeskUrl, issueId);
 
@@ -98,7 +97,7 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
               HttpMethod.POST,
               RequestHelper.createEntity(attachmentRequest,
                   String.format("%s:%s", userEmail, token)),
-              CustomerRequestResponse.class
+              Object.class
           ));
     } catch (HttpStatusCodeException ex) {
       LOGGER.error("Sending customer request to Service Desk API failed: {}",

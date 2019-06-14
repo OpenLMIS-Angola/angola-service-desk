@@ -15,31 +15,29 @@
 
 package org.openlmis.servicedesk.service.attachment;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-public final class AttachmentRequest {
+public class TemporaryAttachmentResponseDataBuilder {
 
-  private List<String> temporaryAttachmentIds;
-  @JsonProperty("public")
-  private boolean isPublic;
-  private AdditionalComment additionalComment;
+  private List<TemporaryAttachment> temporaryAttachments;
 
   /**
-   * Creates attachment request with single temporary attachment id.
-   *
-   * @param temporaryAttachmentId temporary attachment id
+   * Constructor for {@link TemporaryAttachmentResponseDataBuilder}.
+   * Sets default values for new instance of {@link TemporaryAttachmentResponse} class.
    */
-  public AttachmentRequest(String temporaryAttachmentId) {
-    isPublic = true;
-    temporaryAttachmentIds = new ArrayList<>();
-    temporaryAttachmentIds.add(temporaryAttachmentId);
+  public TemporaryAttachmentResponseDataBuilder() {
+    temporaryAttachments = new ArrayList<>();
+    temporaryAttachments.add(new TemporaryAttachmentDataBuilder().build());
+  }
+
+  public TemporaryAttachmentResponseDataBuilder withTemporaryAttachment(
+      TemporaryAttachment temporaryAttachment) {
+    temporaryAttachments.add(temporaryAttachment);
+    return this;
+  }
+
+  public TemporaryAttachmentResponse build() {
+    return new TemporaryAttachmentResponse(temporaryAttachments);
   }
 }

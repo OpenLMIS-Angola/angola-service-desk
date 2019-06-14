@@ -33,7 +33,7 @@ public class CustomerRequestTest {
 
   @Test
   public void shouldImplementToString() {
-    CustomerRequest customerRequest = new CustomerRequest();
+    CustomerRequest customerRequest = new CustomerRequestDataBuilder().build();
     ToStringTestUtils.verify(CustomerRequest.class, customerRequest);
   }
 }

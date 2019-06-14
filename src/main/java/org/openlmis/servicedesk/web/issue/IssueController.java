@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,13 +66,13 @@ public class IssueController {
    * @param issueId Issue that file will be attached to
    */
   @PostMapping("{issueId}/attachment")
-  @ResponseBody
-  @ResponseStatus(HttpStatus.OK)
-  public void upload(@RequestPart("file") MultipartFile file,
+  @ResponseStatus(HttpStatus.CREATED)
+  public void attachFile(@RequestPart("file") MultipartFile file,
       @PathVariable int issueId) {
-    TemporaryAttachmentResponse response = attachmentService.attachTemporaryFile(file).getBody();
+    TemporaryAttachmentResponse response = attachmentService.createTemporaryFile(file).getBody();
     attachmentService.createAttachment(
-        new AttachmentRequest(response.findAttachment(file.getName()).getTemporaryAttachmentId()),
+        new AttachmentRequest(
+            response.findAttachment(file.getOriginalFilename()).getTemporaryAttachmentId()),
         issueId);
   }
 }

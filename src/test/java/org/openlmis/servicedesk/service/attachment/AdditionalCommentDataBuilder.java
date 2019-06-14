@@ -13,26 +13,23 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.servicedesk.service.customerrequest;
+package org.openlmis.servicedesk.service.attachment;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
-import org.junit.Test;
-import org.openlmis.servicedesk.ToStringTestUtils;
+public class AdditionalCommentDataBuilder {
 
-public class StatusTest {
+  private static int instanceNumber = 0;
 
-  @Test
-  public void equalsContract() {
-    EqualsVerifier
-        .forClass(Status.class)
-        .suppress(Warning.NONFINAL_FIELDS)
-        .verify();
+  private String body;
+
+  /**
+   * Constructor for {@link AdditionalCommentDataBuilder}.
+   * Sets default values for new instance of {@link AdditionalComment} class.
+   */
+  public AdditionalCommentDataBuilder() {
+    body = "comment" + instanceNumber;
   }
 
-  @Test
-  public void shouldImplementToString() {
-    Status status = new StatusDataBuilder().build();
-    ToStringTestUtils.verify(Status.class, status);
+  public AdditionalComment build() {
+    return new AdditionalComment(body);
   }
 }

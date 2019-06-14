@@ -33,7 +33,7 @@ public class IssueDtoTest {
 
   @Test
   public void shouldImplementToString() {
-    IssueDto issueDto = new IssueDto();
+    IssueDto issueDto = new IssueDtoDataBuilder().build();
     ToStringTestUtils.verify(IssueDto.class, issueDto);
   }
 }

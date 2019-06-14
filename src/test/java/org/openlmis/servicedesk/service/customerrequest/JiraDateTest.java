@@ -32,7 +32,7 @@ public class JiraDateTest {
 
   @Test
   public void shouldImplementToString() {
-    JiraDate jiraDate = new JiraDate();
+    JiraDate jiraDate = new JiraDateDataBuilder().build();
     ToStringTestUtils.verify(JiraDate.class, jiraDate);
   }
 }

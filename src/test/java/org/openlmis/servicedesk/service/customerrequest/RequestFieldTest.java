@@ -32,7 +32,7 @@ public class RequestFieldTest {
 
   @Test
   public void shouldImplementToString() {
-    RequestField requestField = new RequestField();
+    RequestField requestField = new RequestFieldDataBuilder().build();
     ToStringTestUtils.verify(RequestField.class, requestField);
   }
 }
