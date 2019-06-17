@@ -60,9 +60,9 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
   public ResponseEntity<TemporaryAttachmentResponse> createTemporaryFile(
       MultipartFile multipartFile) {
     LOGGER.error("Creating temporary attachment using Service Desk API: {}",
-        multipartFile.getName());
+        multipartFile.getOriginalFilename());
 
-    String url = String.format("%s/servicedesk/%s/createTemporaryFile",
+    String url = String.format("%s/servicedesk/%s/attachTemporaryFile",
         serviceDeskUrl, serviceDeskId);
 
     MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
