@@ -28,7 +28,8 @@ public abstract class MessageKeys {
   public static final String ERROR_SERVICE_OCCURED = join(ERROR_PREFIX, "service", "errorOccured");
 
   public static final String ATTACHMENT_NOT_FOUND = join(ERROR_PREFIX, "attachment", "notFound");
-  public static final String ATTACHMENT_FAILED_TO_READ = join(ERROR_PREFIX, "attachment", "failedToRead");
+  public static final String ATTACHMENT_FAILED_TO_READ =
+      join(ERROR_PREFIX, "attachment", "failedToRead");
 
   private MessageKeys() {
     throw new UnsupportedOperationException();

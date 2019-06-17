@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
 import org.junit.Before;
@@ -27,6 +28,7 @@ import org.junit.Test;
 import org.openlmis.servicedesk.service.BaseCommunicationService;
 import org.openlmis.servicedesk.service.BaseCommunicationServiceTest;
 import org.openlmis.servicedesk.util.RequestHelper;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -63,12 +65,12 @@ public class AttachmentServiceTest extends BaseCommunicationServiceTest<Attachme
   }
 
   @Test
-  public void shouldSubmitCustomerRequest() {
+  public void shouldSubmitCustomerRequest() throws IOException {
     TemporaryAttachmentResponse expectedResponse =
         new TemporaryAttachmentResponseDataBuilder().build();
     MultipartFile multipartFile = new MockMultipartFile("file", "some-text".getBytes());
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    body.add("file", multipartFile);
+    body.add("file", new ByteArrayResource(multipartFile.getBytes()));
 
     given(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class),
         any(Class.class))).willReturn(ResponseEntity.ok(expectedResponse));

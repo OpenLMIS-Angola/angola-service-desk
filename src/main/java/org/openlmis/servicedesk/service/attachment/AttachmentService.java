@@ -19,7 +19,6 @@ import static org.openlmis.servicedesk.i18n.MessageKeys.ATTACHMENT_FAILED_TO_REA
 import static org.openlmis.servicedesk.util.RequestHelper.createUri;
 
 import java.io.IOException;
-import javax.xml.bind.ValidationException;
 import org.openlmis.servicedesk.exception.ValidationMessageException;
 import org.openlmis.servicedesk.service.BaseCommunicationService;
 import org.openlmis.servicedesk.util.RequestHelper;
@@ -68,7 +67,7 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
 
     MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
     try {
-      formData .add("file", new ByteArrayResource(multipartFile.getBytes()));
+      formData.add("file", new ByteArrayResource(multipartFile.getBytes()));
       return runWithRetry(() ->
           restTemplate.exchange(
               createUri(url),
