@@ -80,7 +80,7 @@ public class AttachmentServiceTest extends BaseCommunicationServiceTest<Attachme
     verifyRequest(1, TemporaryAttachmentResponse.class);
     assertEquals(expectedResponse, response);
     assertEquals(RequestHelper.createUri(
-        String.format("%s/servicedesk/%s/createTemporaryFile", serviceDeskUrl, serviceDeskId)),
+        String.format("%s/servicedesk/%s/attachTemporaryFile", serviceDeskUrl, serviceDeskId)),
         uriCaptor.getValue());
     assertNotNull(entityCaptor.getValue().getBody());
     assertEquals(body, entityCaptor.getValue().getBody());
