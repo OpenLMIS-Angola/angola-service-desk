@@ -74,7 +74,7 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
     headers.put("Expect", "100-continue");
     MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
     try {
-      formData.add("files", transformFiles(multipartFiles));
+      formData.add("file", transformFiles(multipartFiles));
       return runWithRetry(() ->
           restTemplate.exchange(
               createUri(url),
