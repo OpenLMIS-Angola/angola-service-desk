@@ -15,14 +15,12 @@
 
 package org.openlmis.servicedesk.service.attachment;
 
-import static org.openlmis.servicedesk.i18n.MessageKeys.ATTACHMENT_NOT_FOUND;
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.openlmis.servicedesk.exception.NotFoundException;
-import org.openlmis.servicedesk.util.Message;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,15 +30,14 @@ public final class TemporaryAttachmentResponse {
   private List<TemporaryAttachment> temporaryAttachments;
 
   /**
-   * Finds attachment in response with given name.
+   * Finds attachments in response by given names.
    *
-   * @param fileName name to be filtered with
-   * @return
+   * @param  fileNames names that will be used for filtering
+   * @return           list of filtered attachments
    */
-  public TemporaryAttachment findAttachment(String fileName) {
+  public List<TemporaryAttachment> findAttachments(List<String> fileNames) {
     return temporaryAttachments.stream()
-        .filter(attachment -> attachment.getFileName().equals(fileName))
-        .findFirst()
-        .orElseThrow(() -> new NotFoundException(new Message(ATTACHMENT_NOT_FOUND, fileName)));
+        .filter(attachment -> fileNames.contains(attachment.getFileName()))
+        .collect(toList());
   }
 }

@@ -33,13 +33,13 @@ public final class AttachmentRequest {
   private AdditionalComment additionalComment;
 
   /**
-   * Creates attachment request with single temporary attachment id.
+   * Creates attachment request with temporary attachment ids.
    *
-   * @param temporaryAttachmentId temporary attachment id
+   * @param temporaryAttachmentIds temporary attachment id
    */
-  public AttachmentRequest(String temporaryAttachmentId) {
+  public AttachmentRequest(List<String> temporaryAttachmentIds) {
     isPublic = true;
-    temporaryAttachmentIds = new ArrayList<>();
-    temporaryAttachmentIds.add(temporaryAttachmentId);
+    this.temporaryAttachmentIds = new ArrayList<>();
+    this.temporaryAttachmentIds.addAll(temporaryAttachmentIds);
   }
 }

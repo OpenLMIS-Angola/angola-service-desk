@@ -23,11 +23,6 @@ public abstract class MessageKeys {
 
   private static final String SERVICE_PREFIX = "serviceDesk";
   private static final String ERROR_PREFIX = join(SERVICE_PREFIX, "error");
-
-  public static final String ERROR_SERVICE_REQUIRED = join(ERROR_PREFIX, "service", "required");
-  public static final String ERROR_SERVICE_OCCURED = join(ERROR_PREFIX, "service", "errorOccured");
-
-  public static final String ATTACHMENT_NOT_FOUND = join(ERROR_PREFIX, "attachment", "notFound");
   public static final String ATTACHMENT_FAILED_TO_READ =
       join(ERROR_PREFIX, "attachment", "failedToRead");
 

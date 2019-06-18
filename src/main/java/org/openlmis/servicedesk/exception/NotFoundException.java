@@ -15,17 +15,11 @@
 
 package org.openlmis.servicedesk.exception;
 
-import org.openlmis.servicedesk.util.Message;
-
 /**
  * exception for indicating that an entity explicitly asked for wasn't found.  This should result
  * in a NOT FOUND api response.
  */
 public class NotFoundException extends BaseMessageException {
-
-  public NotFoundException(Message message) {
-    super(message);
-  }
 
   public NotFoundException(String messageKey) {
     super(messageKey);

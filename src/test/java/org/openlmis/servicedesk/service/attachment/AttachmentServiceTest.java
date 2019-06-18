@@ -28,14 +28,11 @@ import org.junit.Test;
 import org.openlmis.servicedesk.service.BaseCommunicationService;
 import org.openlmis.servicedesk.service.BaseCommunicationServiceTest;
 import org.openlmis.servicedesk.util.RequestHelper;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
 public class AttachmentServiceTest extends BaseCommunicationServiceTest<AttachmentRequest> {
@@ -68,14 +65,14 @@ public class AttachmentServiceTest extends BaseCommunicationServiceTest<Attachme
   public void shouldSubmitCustomerRequest() throws IOException {
     TemporaryAttachmentResponse expectedResponse =
         new TemporaryAttachmentResponseDataBuilder().build();
-    MultipartFile multipartFile = new MockMultipartFile("file", "some-text".getBytes());
-    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    body.add("file", new ByteArrayResource(multipartFile.getBytes()));
+    MultipartFile multipartFile1 = new MockMultipartFile("file1", "some-text".getBytes());
+    MultipartFile multipartFile2 = new MockMultipartFile("file2", "other-text".getBytes());
+    MultipartFile[] files = {multipartFile1, multipartFile2};
 
     given(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class),
         any(Class.class))).willReturn(ResponseEntity.ok(expectedResponse));
 
-    TemporaryAttachmentResponse response = service.createTemporaryFile(multipartFile).getBody();
+    TemporaryAttachmentResponse response = service.createTemporaryFiles(files).getBody();
 
     verifyRequest(1, TemporaryAttachmentResponse.class);
     assertEquals(expectedResponse, response);
@@ -83,7 +80,6 @@ public class AttachmentServiceTest extends BaseCommunicationServiceTest<Attachme
         String.format("%s/servicedesk/%s/attachTemporaryFile", serviceDeskUrl, serviceDeskId)),
         uriCaptor.getValue());
     assertNotNull(entityCaptor.getValue().getBody());
-    assertEquals(body, entityCaptor.getValue().getBody());
     assertAuthHeader(entityCaptor.getValue(), encodedString);
   }
 
@@ -95,7 +91,7 @@ public class AttachmentServiceTest extends BaseCommunicationServiceTest<Attachme
     given(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class),
         any(Class.class))).willReturn(ResponseEntity.ok("OK"));
 
-    service.createAttachment(attachmentRequest, issueId);
+    service.createAttachments(attachmentRequest, issueId);
 
     verifyRequest(1, Object.class);
     assertEquals(RequestHelper.createUri(

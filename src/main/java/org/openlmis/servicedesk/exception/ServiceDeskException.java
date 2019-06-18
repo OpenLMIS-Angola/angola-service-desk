@@ -15,33 +15,9 @@
 
 package org.openlmis.servicedesk.exception;
 
-import lombok.Getter;
-import org.openlmis.servicedesk.util.Message;
-import org.springframework.http.HttpStatus;
+public class ServiceDeskException extends RuntimeException {
 
-/**
- * Signals we were unable to retrieve reference data
- * due to a communication error.
- */
-@Getter
-public class DataRetrievalException extends BaseMessageException {
-  private final String resource;
-  private final HttpStatus status;
-  private final String response;
-
-  /**
-   * Constructs the exception.
-   *
-   * @param resource the resource that we were trying to retrieve
-   * @param status   the http status that was returned
-   * @param response the response from service
-   */
-  public DataRetrievalException(Message message, String resource,
-                                HttpStatus status, String response) {
-    super(message);
-    this.resource = resource;
-    this.status = status;
-    this.response = response;
+  public ServiceDeskException(String message, Throwable cause) {
+    super(message, cause);
   }
-  
 }

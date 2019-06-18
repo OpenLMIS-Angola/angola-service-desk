@@ -77,7 +77,7 @@ traits:
                  displayName: File attachment
                  type: file
                  required: true
-                 repeat: false
+                 repeat: true
         responses:
           201:
           400:

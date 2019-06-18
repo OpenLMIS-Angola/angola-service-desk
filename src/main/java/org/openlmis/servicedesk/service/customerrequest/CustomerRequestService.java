@@ -17,6 +17,7 @@ package org.openlmis.servicedesk.service.customerrequest;
 
 import static org.openlmis.servicedesk.util.RequestHelper.createUri;
 
+import org.openlmis.servicedesk.exception.ServiceDeskException;
 import org.openlmis.servicedesk.service.BaseCommunicationService;
 import org.openlmis.servicedesk.util.RequestHelper;
 import org.slf4j.Logger;
@@ -63,17 +64,7 @@ public class CustomerRequestService extends BaseCommunicationService<CustomerReq
     } catch (HttpStatusCodeException ex) {
       LOGGER.error("Sending customer request to Service Desk API failed: {}",
           ex.getResponseBodyAsString());
-      throw buildDataRetrievalException(ex);
+      throw new ServiceDeskException(ex.getResponseBodyAsString(), ex);
     }
-  }
-
-  @Override
-  protected Class<CustomerRequest> getResultClass() {
-    return CustomerRequest.class;
-  }
-
-  @Override
-  protected String getServiceName() {
-    return "Service Desk API";
   }
 }

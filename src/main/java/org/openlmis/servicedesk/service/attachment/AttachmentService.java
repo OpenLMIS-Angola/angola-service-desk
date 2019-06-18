@@ -19,6 +19,10 @@ import static org.openlmis.servicedesk.i18n.MessageKeys.ATTACHMENT_FAILED_TO_REA
 import static org.openlmis.servicedesk.util.RequestHelper.createUri;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import org.openlmis.servicedesk.exception.ServiceDeskException;
 import org.openlmis.servicedesk.exception.ValidationMessageException;
 import org.openlmis.servicedesk.service.BaseCommunicationService;
 import org.openlmis.servicedesk.util.RequestHelper;
@@ -54,36 +58,35 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
   /**
    * Attaches temporary file to Service Desk.
    *
-   * @param multipartFile file to be attached
-   * @return              temporary attachment response
+   * @param multipartFiles files to be attached
+   * @return               temporary attachment response
    */
-  public ResponseEntity<TemporaryAttachmentResponse> createTemporaryFile(
-      MultipartFile multipartFile) {
-    LOGGER.error("Creating temporary attachment using Service Desk API: {}",
-        multipartFile.getOriginalFilename());
+  public ResponseEntity<TemporaryAttachmentResponse> createTemporaryFiles(
+      MultipartFile[] multipartFiles) {
+    LOGGER.info("Creating {} temporary attachment(s) using Service Desk API",
+        multipartFiles.length);
 
     String url = String.format("%s/servicedesk/%s/attachTemporaryFile",
         serviceDeskUrl, serviceDeskId);
 
+    Map<String, String> headers = new HashMap<>();
+    headers.put("X-Atlassian-Token", "no-check");
+    headers.put("Expect", "100-continue");
     MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
     try {
-      formData.add("file", new ByteArrayResource(multipartFile.getBytes()));
+      formData.add("files", transformFiles(multipartFiles));
       return runWithRetry(() ->
           restTemplate.exchange(
               createUri(url),
               HttpMethod.POST,
               RequestHelper.createEntity(
-                  formData, String.format("%s:%s", userEmail, token), true),
+                  formData, String.format("%s:%s", userEmail, token), true, headers),
               TemporaryAttachmentResponse.class
           ));
     } catch (HttpStatusCodeException ex) {
       LOGGER.error("Creating temporary attachment in Service Desk failed: {}",
           ex.getResponseBodyAsString());
-      throw buildDataRetrievalException(ex);
-    } catch (IOException ex) {
-      LOGGER.error("Creating temporary attachment in Service Desk failed: {}",
-          ex.getLocalizedMessage());
-      throw new ValidationMessageException(ex, ATTACHMENT_FAILED_TO_READ);
+      throw new ServiceDeskException(ex.getResponseBodyAsString(), ex);
     }
   }
 
@@ -92,8 +95,8 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
    *
    * @param attachmentRequest request to be send
    */
-  public void createAttachment(AttachmentRequest attachmentRequest, int issueId) {
-    LOGGER.error("Attaching file to issue using Service Desk API: {}", attachmentRequest);
+  public void createAttachments(AttachmentRequest attachmentRequest, int issueId) {
+    LOGGER.info("Attaching file to issue using Service Desk API: {}", attachmentRequest);
 
     String url = String.format("%s/request/%s/attachment", serviceDeskUrl, issueId);
 
@@ -109,17 +112,34 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
     } catch (HttpStatusCodeException ex) {
       LOGGER.error("Sending customer request to Service Desk API failed: {}",
           ex.getResponseBodyAsString());
-      throw buildDataRetrievalException(ex);
+      throw new ServiceDeskException(ex.getResponseBodyAsString(), ex);
     }
   }
 
-  @Override
-  protected Class<AttachmentRequest> getResultClass() {
-    return AttachmentRequest.class;
-  }
+  private Object[] transformFiles(MultipartFile[] multipartFiles) {
+    return Arrays.stream(multipartFiles)
+        .map(file -> {
+          ByteArrayResource result;
+          try {
+            result = new ByteArrayResource(file.getBytes()) {
 
-  @Override
-  protected String getServiceName() {
-    return "Service Desk API";
+              @Override
+              public String getFilename() {
+                return file.getOriginalFilename();
+              }
+
+              @Override
+              public long contentLength() {
+                return file.getSize();
+              }
+            };
+          } catch (IOException ex) {
+            LOGGER.error("Creating temporary attachment in Service Desk failed: {}",
+                ex.getLocalizedMessage());
+            throw new ValidationMessageException(ex, ATTACHMENT_FAILED_TO_READ);
+          }
+          return result;
+        })
+        .toArray();
   }
 }

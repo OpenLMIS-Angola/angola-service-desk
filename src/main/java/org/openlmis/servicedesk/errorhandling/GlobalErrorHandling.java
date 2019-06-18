@@ -15,8 +15,8 @@
 
 package org.openlmis.servicedesk.errorhandling;
 
-import org.openlmis.servicedesk.exception.DataRetrievalException;
 import org.openlmis.servicedesk.exception.NotFoundException;
+import org.openlmis.servicedesk.exception.ServiceDeskException;
 import org.openlmis.servicedesk.exception.ValidationMessageException;
 import org.openlmis.servicedesk.util.Message;
 import org.springframework.http.HttpStatus;
@@ -64,11 +64,10 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
    * @param ex the DataRetrievalException to handle
    * @return the error response for the user
    */
-  @ExceptionHandler(DataRetrievalException.class)
+  @ExceptionHandler(ServiceDeskException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
-  public Message.LocalizedMessage handleDataRetrievalException(DataRetrievalException ex) {
-    return getLocalizedMessage(ex);
+  public String handleServiceDeskException(ServiceDeskException ex) {
+    return ex.getMessage();
   }
-
 }

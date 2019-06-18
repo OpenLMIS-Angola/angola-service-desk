@@ -21,6 +21,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import org.openlmis.servicedesk.exception.EncodingException;
 import org.openlmis.servicedesk.service.RequestParameters;
 import org.springframework.http.HttpEntity;
@@ -72,14 +74,30 @@ public final class RequestHelper {
    * @param token     the token to put into the authorization header
    * @param <E>       the type of the body for the request
    * @param multipart if true multipart/form-data header will be set, otherwise application/json
+   * @param headers   additional http headers
    * @return          the {@link HttpEntity} to use
    */
-  public static <E> HttpEntity<E> createEntity(E payload, String token, boolean multipart) {
+  public static <E> HttpEntity<E> createEntity(E payload, String token, boolean multipart,
+      Map<String, String> headers) {
     if (payload == null) {
       return createEntity(token);
     } else {
-      return new HttpEntity<>(payload, createHeadersWithAuth(token, multipart));
+      return new HttpEntity<>(payload, createHeadersWithAuth(token, multipart, headers));
     }
+  }
+
+  /**
+   * Creates an {@link HttpEntity} with the given payload as a body and adds an authorization
+   * header with the provided token.
+   *
+   * @param payload   the body of the request, pass null if no body
+   * @param token     the token to put into the authorization header
+   * @param <E>       the type of the body for the request
+   * @param multipart if true multipart/form-data header will be set, otherwise application/json
+   * @return          the {@link HttpEntity} to use
+   */
+  public static <E> HttpEntity<E> createEntity(E payload, String token, boolean multipart) {
+    return createEntity(payload, token, multipart, new HashMap<>());
   }
 
   /**
@@ -99,17 +117,19 @@ public final class RequestHelper {
     return new HttpEntity<>(createHeadersWithAuth(token));
   }
 
-  private static HttpHeaders createHeadersWithAuth(String credentials, boolean multipart) {
+  private static HttpHeaders createHeadersWithAuth(String credentials, boolean multipart,
+      Map<String, String> requestHeaders) {
     HttpHeaders headers = new HttpHeaders();
     MediaType type = multipart ? MediaType.MULTIPART_FORM_DATA : MediaType.APPLICATION_JSON;
     headers.setContentType(type);
     headers.setAccept(singletonList(MediaType.APPLICATION_JSON));
+    requestHeaders.forEach(headers::add);
     String encodedString = Base64.getEncoder().encodeToString(credentials.getBytes());
     headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedString);
     return headers;
   }
 
   private static HttpHeaders createHeadersWithAuth(String credentials) {
-    return createHeadersWithAuth(credentials, false);
+    return createHeadersWithAuth(credentials, false, new HashMap<>());
   }
 }

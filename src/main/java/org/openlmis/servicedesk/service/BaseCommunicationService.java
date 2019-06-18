@@ -15,25 +15,14 @@
 
 package org.openlmis.servicedesk.service;
 
-import static org.openlmis.servicedesk.i18n.MessageKeys.ERROR_SERVICE_OCCURED;
-import static org.openlmis.servicedesk.i18n.MessageKeys.ERROR_SERVICE_REQUIRED;
-
-import org.openlmis.servicedesk.exception.DataRetrievalException;
-import org.openlmis.servicedesk.util.Message;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
-@SuppressWarnings("PMD.TooManyMethods")
 public abstract class BaseCommunicationService<T> {
 
   protected RestOperations restTemplate = new RestTemplate();
-
-  protected abstract Class<T> getResultClass();
-
-  protected abstract String getServiceName();
 
   protected <P> ResponseEntity<P> runWithRetry(HttpTask<P> task) {
     try {
@@ -49,20 +38,6 @@ public abstract class BaseCommunicationService<T> {
   @FunctionalInterface
   protected interface HttpTask<T> {
     ResponseEntity<T> run();
-  }
-
-  protected DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
-    String errorKey;
-    if (ex.getStatusCode().is5xxServerError() || ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-      errorKey = ERROR_SERVICE_REQUIRED;
-    } else {
-      errorKey = ERROR_SERVICE_OCCURED;
-    }
-    return new DataRetrievalException(
-        new Message(errorKey, getServiceName()),
-        getResultClass().getSimpleName(),
-        ex.getStatusCode(),
-        ex.getResponseBodyAsString());
   }
 
   void setRestTemplate(RestOperations template) {

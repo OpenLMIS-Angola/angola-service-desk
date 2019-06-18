@@ -27,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.servicedesk.exception.NotFoundException;
+import org.openlmis.servicedesk.exception.ServiceDeskException;
 import org.openlmis.servicedesk.exception.ValidationMessageException;
 import org.openlmis.servicedesk.i18n.MessageService;
 import org.openlmis.servicedesk.util.Message;
@@ -83,6 +84,13 @@ public class GlobalErrorHandlingTest {
 
     // then
     assertMessage(message, messageKey);
+  }
+
+  @Test
+  public void shouldHandleServiceDeskException() {
+    ServiceDeskException exp = new ServiceDeskException(ERROR_MESSAGE, new NullPointerException());
+
+    assertThat(errorHandler.handleServiceDeskException(exp)).isEqualTo(ERROR_MESSAGE);
   }
 
   private void assertMessage(LocalizedMessage localized, String key) {
