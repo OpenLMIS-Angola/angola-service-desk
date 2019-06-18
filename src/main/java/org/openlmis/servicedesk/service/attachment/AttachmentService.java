@@ -19,7 +19,6 @@ import static org.openlmis.servicedesk.i18n.MessageKeys.ATTACHMENT_FAILED_TO_REA
 import static org.openlmis.servicedesk.util.RequestHelper.createUri;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.openlmis.servicedesk.exception.ServiceDeskException;
@@ -58,13 +57,13 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
   /**
    * Attaches temporary file to Service Desk.
    *
-   * @param multipartFiles files to be attached
-   * @return               temporary attachment response
+   * @param multipartFile file to be attached
+   * @return              temporary attachment response
    */
   public ResponseEntity<TemporaryAttachmentResponse> createTemporaryFiles(
-      MultipartFile[] multipartFiles) {
-    LOGGER.info("Creating {} temporary attachment(s) using Service Desk API",
-        multipartFiles.length);
+      MultipartFile multipartFile) {
+    LOGGER.info("Creating temporary attachment using Service Desk API: {}",
+        multipartFile.getOriginalFilename());
 
     String url = String.format("%s/servicedesk/%s/attachTemporaryFile",
         serviceDeskUrl, serviceDeskId);
@@ -74,7 +73,7 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
     headers.put("Expect", "100-continue");
     MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
     try {
-      formData.add("file", transformFiles(multipartFiles));
+      formData.add("file", transformFile(multipartFile));
       return runWithRetry(() ->
           restTemplate.exchange(
               createUri(url),
@@ -87,6 +86,10 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
       LOGGER.error("Creating temporary attachment in Service Desk failed: {}",
           ex.getResponseBodyAsString());
       throw new ServiceDeskException(ex.getResponseBodyAsString(), ex);
+    } catch (IOException ex) {
+      LOGGER.error("Creating temporary attachment in Service Desk failed: {}",
+          ex.getLocalizedMessage());
+      throw new ValidationMessageException(ex, ATTACHMENT_FAILED_TO_READ);
     }
   }
 
@@ -116,30 +119,18 @@ public class AttachmentService extends BaseCommunicationService<AttachmentReques
     }
   }
 
-  private Object[] transformFiles(MultipartFile[] multipartFiles) {
-    return Arrays.stream(multipartFiles)
-        .map(file -> {
-          ByteArrayResource result;
-          try {
-            result = new ByteArrayResource(file.getBytes()) {
+  private Object transformFile(MultipartFile file) throws IOException {
+    return new ByteArrayResource(file.getBytes()) {
 
-              @Override
-              public String getFilename() {
-                return file.getOriginalFilename();
-              }
+      @Override
+      public String getFilename() {
+        return file.getOriginalFilename();
+      }
 
-              @Override
-              public long contentLength() {
-                return file.getSize();
-              }
-            };
-          } catch (IOException ex) {
-            LOGGER.error("Creating temporary attachment in Service Desk failed: {}",
-                ex.getLocalizedMessage());
-            throw new ValidationMessageException(ex, ATTACHMENT_FAILED_TO_READ);
-          }
-          return result;
-        })
-        .toArray();
+      @Override
+      public long contentLength() {
+        return file.getSize();
+      }
+    };
   }
 }

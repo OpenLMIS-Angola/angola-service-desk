@@ -15,12 +15,8 @@
 
 package org.openlmis.servicedesk.web.issue;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.Arrays;
 import org.openlmis.servicedesk.service.attachment.AttachmentRequest;
 import org.openlmis.servicedesk.service.attachment.AttachmentService;
-import org.openlmis.servicedesk.service.attachment.TemporaryAttachment;
 import org.openlmis.servicedesk.service.attachment.TemporaryAttachmentResponse;
 import org.openlmis.servicedesk.service.customerrequest.CustomerRequest;
 import org.openlmis.servicedesk.service.customerrequest.CustomerRequestBuilder;
@@ -64,28 +60,18 @@ public class IssueController {
   }
 
   /**
-   * Attaches files to Service Desk issue.
+   * Attaches file to Service Desk issue.
    *
-   * @param files   files to be attached
+   * @param file    file to be attached
    * @param issueId issue that file will be attached to
    */
   @PostMapping("{issueId}/attachment")
   @ResponseStatus(HttpStatus.CREATED)
-  public void attachFile(@RequestPart("file") MultipartFile[] files,
-      @PathVariable int issueId) {
-    TemporaryAttachmentResponse response = attachmentService.createTemporaryFiles(files).getBody();
+  public void attachFile(@RequestPart("file") MultipartFile file, @PathVariable int issueId) {
+    TemporaryAttachmentResponse response = attachmentService.createTemporaryFiles(file).getBody();
     attachmentService.createAttachments(
-        toAttachmentRequest(files, response),
+        new AttachmentRequest(
+            response.findAttachment(file.getOriginalFilename()).getTemporaryAttachmentId()),
         issueId);
-  }
-
-  private AttachmentRequest toAttachmentRequest(MultipartFile[] files,
-      TemporaryAttachmentResponse response) {
-    return new AttachmentRequest(
-        response.findAttachments(Arrays.stream(files)
-            .map(MultipartFile::getOriginalFilename)
-            .collect(toList())).stream()
-            .map(TemporaryAttachment::getTemporaryAttachmentId)
-            .collect(toList()));
   }
 }

@@ -65,14 +65,11 @@ public class AttachmentServiceTest extends BaseCommunicationServiceTest<Attachme
   public void shouldSubmitCustomerRequest() throws IOException {
     TemporaryAttachmentResponse expectedResponse =
         new TemporaryAttachmentResponseDataBuilder().build();
-    MultipartFile multipartFile1 = new MockMultipartFile("file1", "some-text".getBytes());
-    MultipartFile multipartFile2 = new MockMultipartFile("file2", "other-text".getBytes());
-    MultipartFile[] files = {multipartFile1, multipartFile2};
-
+    MultipartFile multipartFile = new MockMultipartFile("file", "some-text".getBytes());
     given(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class),
         any(Class.class))).willReturn(ResponseEntity.ok(expectedResponse));
 
-    TemporaryAttachmentResponse response = service.createTemporaryFiles(files).getBody();
+    TemporaryAttachmentResponse response = service.createTemporaryFiles(multipartFile).getBody();
 
     verifyRequest(1, TemporaryAttachmentResponse.class);
     assertEquals(expectedResponse, response);

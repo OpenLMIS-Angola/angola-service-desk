@@ -15,11 +15,9 @@
 
 package org.openlmis.servicedesk.service.attachment;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.openlmis.servicedesk.i18n.MessageKeys.ATTACHMENT_NOT_FOUND;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -27,6 +25,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openlmis.servicedesk.ToStringTestUtils;
+import org.openlmis.servicedesk.exception.NotFoundException;
+import org.openlmis.servicedesk.util.Message;
 
 public class TemporaryAttachmentResponseTest {
 
@@ -63,38 +63,20 @@ public class TemporaryAttachmentResponseTest {
                 .build())
             .build();
 
-    assertThat(temporaryAttachmentResponse.findAttachments(singletonList("correctFile")),
-        hasItems(correctAttachment));
-  }
-
-  @Test
-  public void shouldFindProperAttachments() {
-    TemporaryAttachment correctAttachment1 = new TemporaryAttachmentDataBuilder()
-        .withFileName("correctFile1")
-        .build();
-    TemporaryAttachment correctAttachment2 = new TemporaryAttachmentDataBuilder()
-        .withFileName("correctFile2")
-        .build();
-    TemporaryAttachmentResponse temporaryAttachmentResponse =
-        new TemporaryAttachmentResponseDataBuilder()
-            .withTemporaryAttachment(correctAttachment1)
-            .withTemporaryAttachment(correctAttachment2)
-            .withTemporaryAttachment(new TemporaryAttachmentDataBuilder()
-                .withFileName("incorrectFile")
-                .build())
-            .build();
-
-    assertThat(temporaryAttachmentResponse.findAttachments(asList("correctFile1", "correctFile2")),
-        hasItems(correctAttachment1, correctAttachment2));
+    assertThat(temporaryAttachmentResponse.findAttachment("correctFile"),
+        equalTo(correctAttachment));
   }
 
   @Test
   public void shouldReturnEmptyListIfAttachmentIsNotFound() {
     String missingFile = "MISSING";
 
+    expectedException.expect(NotFoundException.class);
+    expectedException.expectMessage(new Message(ATTACHMENT_NOT_FOUND, missingFile).toString());
+
     TemporaryAttachmentResponse temporaryAttachmentResponse =
         new TemporaryAttachmentResponseDataBuilder().build();
 
-    assertEquals(0, temporaryAttachmentResponse.findAttachments(singletonList(missingFile)).size());
+    temporaryAttachmentResponse.findAttachment(missingFile);
   }
 }

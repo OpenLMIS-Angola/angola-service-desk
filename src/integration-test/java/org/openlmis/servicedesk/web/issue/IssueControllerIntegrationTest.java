@@ -15,7 +15,6 @@
 
 package org.openlmis.servicedesk.web.issue;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -65,22 +64,15 @@ public class IssueControllerIntegrationTest extends BaseWebIntegrationTest {
   private CustomerRequest customerRequest = new CustomerRequestDataBuilder().build();
   private IssueDto issueDto = new IssueDtoDataBuilder().build();
 
-  private String fileName1 = "some-file-1.txt";
-  private String fileName2 = "some-file-2.txt";
-  private TemporaryAttachment temporaryAttachment1 = new TemporaryAttachmentDataBuilder()
-      .withFileName(fileName1)
-      .build();
-  private TemporaryAttachment temporaryAttachment2 = new TemporaryAttachmentDataBuilder()
-      .withFileName(fileName2)
+  private String fileName = "some-file.txt";
+  private TemporaryAttachment temporaryAttachment = new TemporaryAttachmentDataBuilder()
+      .withFileName(fileName)
       .build();
   private AttachmentRequest attachmentRequest =
-      new AttachmentRequest(asList(
-          temporaryAttachment1.getTemporaryAttachmentId(),
-          temporaryAttachment2.getTemporaryAttachmentId()));
+      new AttachmentRequest(temporaryAttachment.getTemporaryAttachmentId());
   private TemporaryAttachmentResponse temporaryAttachmentResponse =
       new TemporaryAttachmentResponseDataBuilder()
-          .withTemporaryAttachment(temporaryAttachment1)
-          .withTemporaryAttachment(temporaryAttachment2)
+          .withTemporaryAttachment(temporaryAttachment)
           .build();
 
   @Before
@@ -113,19 +105,15 @@ public class IssueControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldAttachFileToIssue() throws IOException {
-    ClassPathResource fileToUpload1 = new ClassPathResource(fileName1);
-    ClassPathResource fileToUpload2 = new ClassPathResource(fileName2);
+    ClassPathResource fileToUpload = new ClassPathResource(fileName);
     int issueId = 10;
 
     restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
         .multiPart("file",
-            fileToUpload1.getFilename(),
-            fileToUpload1.getInputStream())
-        .multiPart("file",
-            fileToUpload2.getFilename(),
-            fileToUpload2.getInputStream())
+            fileToUpload.getFilename(),
+            fileToUpload.getInputStream())
         .pathParam("issueId", issueId)
         .when()
         .post(ATTACHMENT_URL)

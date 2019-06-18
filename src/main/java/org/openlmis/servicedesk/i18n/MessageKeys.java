@@ -23,8 +23,10 @@ public abstract class MessageKeys {
 
   private static final String SERVICE_PREFIX = "serviceDesk";
   private static final String ERROR_PREFIX = join(SERVICE_PREFIX, "error");
+
   public static final String ATTACHMENT_FAILED_TO_READ =
       join(ERROR_PREFIX, "attachment", "failedToRead");
+  public static final String ATTACHMENT_NOT_FOUND = join(ERROR_PREFIX, "attachment", "notFound");
 
   private MessageKeys() {
     throw new UnsupportedOperationException();
