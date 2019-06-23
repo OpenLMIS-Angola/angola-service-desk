@@ -4,5 +4,56 @@
   "title": "Issue",
   "description": "A single Service Desk issue",
   "properties": {
-  }
+    "type": {
+      "enum": [
+        "BUG",
+        "SUPPORT",
+        "IMPROVEMENT",
+        "NEW_FEATURE"
+      ],
+      "title": "type"
+    },
+    "summary": {
+      "type": "string",
+      "title": "summary"
+    },
+    "description": {
+      "type": "string",
+      "title": "description"
+    },
+    "priority": {
+      "enum": [
+        "URGENT",
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ],
+      "title": "priority"
+    },
+    "impact": {
+      "enum": [
+        "EXTENSIVE",
+        "SIGNIFICANT",
+        "MODERATE",
+        "LOCAL"
+      ],
+      "title": "impact"
+    },
+    "email": {
+      "type": "string",
+      "title": "email"
+    },
+    "displayName": {
+      "type": "string",
+      "title": "displayName"
+    }
+  },
+  "required": [
+    "type",
+    "summary",
+    "description",
+    "priority",
+    "impact",
+    "email"
+  ]
 }

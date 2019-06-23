@@ -3,9 +3,15 @@ services:
   service-desk:
     image: openlmisao/service-desk
     links:
+      - db
       - log
     ports:
       - "8080"
+    env_file: .env
+  db:
+    image: openlmis/postgres:9.6
+    ports:
+      - "5432"
     env_file: .env
   log:
     image: openlmis/rsyslog:1

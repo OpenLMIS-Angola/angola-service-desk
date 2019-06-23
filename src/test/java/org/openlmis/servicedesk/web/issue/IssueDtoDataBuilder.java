@@ -17,25 +17,33 @@ package org.openlmis.servicedesk.web.issue;
 
 public class IssueDtoDataBuilder {
 
+  private static int instanceNumber = 0;
+
   private IssueType type;
   private String summary;
   private String description;
   private PriorityType priority;
   private ImpactType impact;
+  private String email;
+  private String displayName;
 
   /**
    * Constructor for {@link IssueDtoDataBuilder}.
    * Sets default values for new instance of {@link IssueDto} class.
    */
   public IssueDtoDataBuilder() {
+    instanceNumber++;
+
     type = IssueType.SUPPORT;
-    summary = "summary";
-    description = "description";
+    summary = "summary-" + instanceNumber;
+    description = "description " + instanceNumber;
     priority = PriorityType.LOW;
     impact = ImpactType.LOCAL;
+    email = String.format("user%s@siglofa.org", instanceNumber);
+    displayName = "User " + instanceNumber;
   }
 
   public IssueDto build() {
-    return new IssueDto(type, summary, description, priority, impact);
+    return new IssueDto(type, summary, description, priority, impact, email, displayName);
   }
 }

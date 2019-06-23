@@ -16,34 +16,25 @@
 package org.openlmis.servicedesk.web.issue;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
-import guru.nidi.ramltester.junit.RamlMatchers;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
-import org.openlmis.servicedesk.service.attachment.AttachmentRequest;
-import org.openlmis.servicedesk.service.attachment.AttachmentService;
-import org.openlmis.servicedesk.service.attachment.TemporaryAttachment;
-import org.openlmis.servicedesk.service.attachment.TemporaryAttachmentDataBuilder;
-import org.openlmis.servicedesk.service.attachment.TemporaryAttachmentResponse;
-import org.openlmis.servicedesk.service.attachment.TemporaryAttachmentResponseDataBuilder;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequest;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequestBuilder;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequestDataBuilder;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequestResponse;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequestResponseDataBuilder;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequestService;
+import org.openlmis.servicedesk.service.IssueService;
+import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequest;
+import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequestDataBuilder;
+import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequestResponse;
+import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequestResponseDataBuilder;
 import org.openlmis.servicedesk.web.BaseWebIntegrationTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 public class IssueControllerIntegrationTest extends BaseWebIntegrationTest {
 
@@ -51,37 +42,19 @@ public class IssueControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String ATTACHMENT_URL = ISSUES_URL + "/{issueId}/attachment";
 
   @MockBean
-  private CustomerRequestBuilder customerRequestBuilder;
-
-  @MockBean
-  private CustomerRequestService customerRequestService;
-
-  @MockBean
-  private AttachmentService attachmentService;
+  private IssueService issueService;
 
   private CustomerRequestResponse customerRequestResponse =
       new CustomerRequestResponseDataBuilder().build();
   private CustomerRequest customerRequest = new CustomerRequestDataBuilder().build();
   private IssueDto issueDto = new IssueDtoDataBuilder().build();
 
-  private String fileName = "some-file.txt";
-  private TemporaryAttachment temporaryAttachment = new TemporaryAttachmentDataBuilder()
-      .withFileName(fileName)
-      .build();
-  private AttachmentRequest attachmentRequest =
-      new AttachmentRequest(temporaryAttachment.getTemporaryAttachmentId());
-  private TemporaryAttachmentResponse temporaryAttachmentResponse =
-      new TemporaryAttachmentResponseDataBuilder()
-          .withTemporaryAttachment(temporaryAttachment)
-          .build();
-
   @Before
   public void setUp() {
-    given(customerRequestBuilder.build(eq(issueDto))).willReturn(customerRequest);
-    given(customerRequestService.submit(eq(customerRequest)))
-        .willReturn(ResponseEntity.ok(customerRequestResponse));
-    given(attachmentService.createTemporaryFiles(any()))
-        .willReturn(ResponseEntity.ok(temporaryAttachmentResponse));
+    given(issueService.prepareCustomerRequest(eq(issueDto)))
+        .willReturn(customerRequest);
+    given(issueService.sendCustomerRequest(eq(customerRequest)))
+        .willReturn(customerRequestResponse);
   }
 
   @Test
@@ -100,12 +73,11 @@ public class IssueControllerIntegrationTest extends BaseWebIntegrationTest {
 
     // then
     assertEquals(customerRequestResponse, response);
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
   public void shouldAttachFileToIssue() throws IOException {
-    ClassPathResource fileToUpload = new ClassPathResource(fileName);
+    ClassPathResource fileToUpload = new ClassPathResource("some-file.txt");
     int issueId = 10;
 
     restAssured.given()
@@ -120,7 +92,6 @@ public class IssueControllerIntegrationTest extends BaseWebIntegrationTest {
         .then()
         .statusCode(201);
 
-    verify(attachmentService).createAttachments(attachmentRequest, issueId);
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.responseChecks());
+    verify(issueService).attachFile(any(MultipartFile.class), eq(issueId));
   }
 }

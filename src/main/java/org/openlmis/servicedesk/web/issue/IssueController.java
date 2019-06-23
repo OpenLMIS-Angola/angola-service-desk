@@ -15,13 +15,9 @@
 
 package org.openlmis.servicedesk.web.issue;
 
-import org.openlmis.servicedesk.service.attachment.AttachmentRequest;
-import org.openlmis.servicedesk.service.attachment.AttachmentService;
-import org.openlmis.servicedesk.service.attachment.TemporaryAttachmentResponse;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequest;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequestBuilder;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequestResponse;
-import org.openlmis.servicedesk.service.customerrequest.CustomerRequestService;
+import org.openlmis.servicedesk.service.IssueService;
+import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequest;
+import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,13 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class IssueController {
 
   @Autowired
-  private CustomerRequestBuilder customerRequestBuilder;
-
-  @Autowired
-  private CustomerRequestService customerRequestService;
-
-  @Autowired
-  private AttachmentService attachmentService;
+  private IssueService issueService;
 
   /**
    * Creates new Jra issue.
@@ -55,8 +45,8 @@ public class IssueController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public CustomerRequestResponse createIssue(@RequestBody IssueDto issue) {
-    CustomerRequest customerRequest = customerRequestBuilder.build(issue);
-    return customerRequestService.submit(customerRequest).getBody();
+    CustomerRequest customerRequest = issueService.prepareCustomerRequest(issue);
+    return issueService.sendCustomerRequest(customerRequest);
   }
 
   /**
@@ -68,10 +58,6 @@ public class IssueController {
   @PostMapping("{issueId}/attachment")
   @ResponseStatus(HttpStatus.CREATED)
   public void attachFile(@RequestPart("file") MultipartFile file, @PathVariable int issueId) {
-    TemporaryAttachmentResponse response = attachmentService.createTemporaryFiles(file).getBody();
-    attachmentService.createAttachments(
-        new AttachmentRequest(
-            response.findAttachment(file.getOriginalFilename()).getTemporaryAttachmentId()),
-        issueId);
+    issueService.attachFile(file, issueId);
   }
 }

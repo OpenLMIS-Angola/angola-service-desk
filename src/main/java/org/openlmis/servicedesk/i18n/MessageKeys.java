@@ -28,6 +28,10 @@ public abstract class MessageKeys {
       join(ERROR_PREFIX, "attachment", "failedToRead");
   public static final String ATTACHMENT_NOT_FOUND = join(ERROR_PREFIX, "attachment", "notFound");
 
+  public static final String CUSTOMER_NOT_FOUND = join(ERROR_PREFIX, "customer", "notFound");
+  public static final String CANNOT_ADD_CUSTOMER_TO_SERVICE_DESK = join(ERROR_PREFIX, "customer",
+      "cannotAddToServiceDesk");
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

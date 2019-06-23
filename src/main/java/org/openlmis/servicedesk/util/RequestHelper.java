@@ -117,6 +117,10 @@ public final class RequestHelper {
     return new HttpEntity<>(createHeadersWithAuth(token));
   }
 
+  public static <E> HttpEntity<E> createEntity(String token, Map<String, String> headers) {
+    return new HttpEntity<>(createHeadersWithAuth(token, headers));
+  }
+
   private static HttpHeaders createHeadersWithAuth(String credentials, boolean multipart,
       Map<String, String> requestHeaders) {
     HttpHeaders headers = new HttpHeaders();
@@ -131,5 +135,10 @@ public final class RequestHelper {
 
   private static HttpHeaders createHeadersWithAuth(String credentials) {
     return createHeadersWithAuth(credentials, false, new HashMap<>());
+  }
+
+  private static HttpHeaders createHeadersWithAuth(
+      String credentials, Map<String, String> headers) {
+    return createHeadersWithAuth(credentials, false, headers);
   }
 }

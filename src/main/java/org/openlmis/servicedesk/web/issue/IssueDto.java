@@ -28,4 +28,6 @@ public final class IssueDto {
   private String description;
   private PriorityType priority;
   private ImpactType impact;
+  private String email;
+  private String displayName;
 }

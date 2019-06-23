@@ -8,7 +8,9 @@ buildscript {
 }
 
 plugins {
+    id 'org.springframework.boot' version '1.5.16.RELEASE'
     id "com.moowork.node" version "1.2.0"
+    id "org.flywaydb.flyway" version "4.0"
 }
 
 apply plugin: 'java'
@@ -33,8 +35,10 @@ repositories {
 
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-data-rest"
+    compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.security.oauth:spring-security-oauth2"
+    compile "org.postgresql:postgresql:42.0.0"
     compile "org.projectlombok:lombok:1.16.8"
     compile "org.slf4j:slf4j-ext:1.7.25"
     compile 'commons-io:commons-io:2.5'
@@ -42,6 +46,7 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.5'
     compile 'org.openlmis:openlmis-service-util:3.1.0'
     compile 'org.webjars.npm:api-console:3.0.17'
+    compile 'org.flywaydb:flyway-core:4.1.2'
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"
@@ -75,6 +80,16 @@ idea {
     }
 }
 
+flyway {
+    url = "$System.env.DATABASE_URL"
+    user = "$System.env.POSTGRES_USER"
+    password = "$System.env.POSTGRES_PASSWORD"
+    schemas = ['servicedesk']
+    sqlMigrationPrefix = ''
+    placeholderPrefix = '#['
+    placeholderSuffix = ']'
+}
+
 sourceSets {
     integrationTest {
         java {
@@ -104,9 +119,32 @@ task integrationTest(type: Test) {
     exclude '**/migration/**'
 }
 
+task flywayTest(type: Test) {
+    mustRunAfter integrationTest
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = 'full'
+    }
+
+    include '**/migration/**'
+}
+
 tasks.withType(Test) {
     reports.html.destination = file("${reporting.baseDir}/${name}")
     reports.junitXml.destination = file("${testResultsDir}/${name}")
+}
+
+task generateMigration {
+    description 'Creates an empty new file within the src/main/resources/db/migration directory into which developers can add new SQL migration code.'
+    doLast {
+        def fileName = project.hasProperty('migrationName') ? migrationName : 'migration'
+        def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
+        def fullFileName = "${timestamp}__${fileName}.sql"
+        def migrationFile = new File(sourceSets.main.resources.srcDirs.first(), 'db/migration/' + fullFileName)
+        migrationFile.createNewFile()
+    }
 }
 
 task checkApiIsRaml(type:Exec) {

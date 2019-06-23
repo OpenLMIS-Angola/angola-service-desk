@@ -15,21 +15,31 @@
 
 package org.openlmis.servicedesk;
 
+import java.time.Clock;
+import java.time.ZoneId;
 import java.util.Locale;
 import org.openlmis.servicedesk.i18n.ExposedMessageSourceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
 @SpringBootApplication
 public class Application {
 
+  private Logger logger = LoggerFactory.getLogger(Application.class);
+
   @Value("${defaultLocale}")
   private Locale locale;
 
+  @Value("${time.zoneId}")
+  private String timeZoneId;
 
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
@@ -60,5 +70,26 @@ public class Application {
     messageSource.setDefaultEncoding("UTF-8");
     messageSource.setUseCodeAsDefaultMessage(true);
     return messageSource;
+  }
+
+  /**
+   * Configures the Flyway migration strategy to clean the DB before migration first. This is used
+   * as the default unless the Spring Profile "production" is active.
+   *
+   * @return the clean-migrate strategy
+   */
+  @Bean
+  @Profile("!production")
+  public FlywayMigrationStrategy cleanMigrationStrategy() {
+    return flyway -> {
+      logger.info("Using clean-migrate flyway strategy -- production profile not active");
+      flyway.clean();
+      flyway.migrate();
+    };
+  }
+
+  @Bean
+  public Clock clock() {
+    return Clock.system(ZoneId.of(timeZoneId));
   }
 }
