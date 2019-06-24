@@ -63,7 +63,7 @@ public class IssueService {
         .findByEmail(issue.getEmail())
         .orElseGet(() -> createNewCustomer(issue.getEmail(), issue.getDisplayName()));
 
-    return customerRequestBuilder.build(issue, customer.getCustomerId());
+    return customerRequestBuilder.build(issue, customer == null ? null : customer.getCustomerId());
   }
 
   /**
@@ -91,6 +91,10 @@ public class IssueService {
   }
 
   private ServiceDeskCustomer createNewCustomer(String email, String displayName) {
+    if (email == null) {
+      return null;
+    }
+
     CreatedCustomer customer = customerService.create(new Customer(displayName, email)).getBody();
     if (customer == null) {
       CustomersResponse response = customerService.getServiceDeskCustomers(email).getBody();
