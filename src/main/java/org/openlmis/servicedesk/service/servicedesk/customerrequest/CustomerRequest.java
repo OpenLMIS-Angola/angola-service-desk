@@ -15,7 +15,6 @@
 
 package org.openlmis.servicedesk.service.servicedesk.customerrequest;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,5 +26,5 @@ public final class CustomerRequest {
   private Integer serviceDeskId;
   private Integer requestTypeId;
   private RequestFieldValues requestFieldValues;
-  private List<String> requestParticipants;
+  private String raiseOnBehalfOf;
 }

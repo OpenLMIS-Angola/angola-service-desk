@@ -15,25 +15,26 @@
 
 package org.openlmis.servicedesk.service.servicedesk.customerrequest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CustomerRequestDataBuilder {
+
+  private static int instanceNumber = 0;
 
   private Integer serviceDeskId;
   private Integer requestTypeId;
   private RequestFieldValues requestFieldValues;
-  private List<String> requestParticipants;
+  private String raiseOnBehalfOf;
 
   /**
    * Constructor for {@link CustomerRequestDataBuilder}.
    * Sets default values for new instance of {@link CustomerRequest} class.
    */
   public CustomerRequestDataBuilder() {
+    instanceNumber++;
+
     serviceDeskId = 1;
-    requestTypeId = 2;
+    requestTypeId = instanceNumber % 4;
     requestFieldValues = new RequestFieldValuesDataBuilder().build();
-    requestParticipants = new ArrayList<>();
+    raiseOnBehalfOf = "customer" + instanceNumber;
   }
 
   public CustomerRequestDataBuilder withServiceDeskId(Integer serviceDeskId) {
@@ -51,13 +52,12 @@ public class CustomerRequestDataBuilder {
     return this;
   }
 
-  public CustomerRequestDataBuilder withRequestParticipant(String requestParticipant) {
-    this.requestParticipants.add(requestParticipant);
+  public CustomerRequestDataBuilder withRaiseOnBehalfOf(String raiseOnBehalfOf) {
+    this.raiseOnBehalfOf = raiseOnBehalfOf;
     return this;
   }
 
   public CustomerRequest build() {
-    return new CustomerRequest(
-        serviceDeskId, requestTypeId, requestFieldValues, requestParticipants);
+    return new CustomerRequest(serviceDeskId, requestTypeId, requestFieldValues, raiseOnBehalfOf);
   }
 }

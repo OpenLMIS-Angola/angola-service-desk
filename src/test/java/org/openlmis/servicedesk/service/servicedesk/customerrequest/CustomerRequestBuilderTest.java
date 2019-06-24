@@ -44,7 +44,7 @@ public class CustomerRequestBuilderTest {
           .withImpact(new CustomField(issueDto.getImpact().getValue().toString()))
           .withPriority(new CustomField(issueDto.getPriority().getValue().toString()))
           .build())
-      .withRequestParticipant(requestParticipant)
+      .withRaiseOnBehalfOf(requestParticipant)
       .build();
 
   @Before

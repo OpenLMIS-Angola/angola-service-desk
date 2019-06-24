@@ -15,8 +15,6 @@
 
 package org.openlmis.servicedesk.service.servicedesk.customerrequest;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.openlmis.servicedesk.web.issue.IssueDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -30,12 +28,11 @@ public class CustomerRequestBuilder {
   /**
    * Builds valid Service Desk customer Request object from issue send from UI.
    *
-   * @param  issue issue send from UI
-   * @return       customer request ready to send to Service Desk API
+   * @param  issue             issue send from UI
+   * @param  customerAccountId customer id to be used as request author
+   * @return                   customer request ready to send to Service Desk API
    */
-  public CustomerRequest build(IssueDto issue, String customerId) {
-    List<String> recipients = new ArrayList<>();
-    recipients.add(customerId);
+  public CustomerRequest build(IssueDto issue, String customerAccountId) {
     return new CustomerRequest(
         serviceDeskId,
         issue.getType().getValue(),
@@ -44,6 +41,6 @@ public class CustomerRequestBuilder {
             issue.getDescription(),
             new CustomField(issue.getImpact().getValue().toString()),
             new CustomField(issue.getPriority().getValue().toString())),
-        recipients);
+        customerAccountId);
   }
 }

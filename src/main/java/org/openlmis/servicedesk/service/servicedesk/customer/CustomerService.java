@@ -76,7 +76,7 @@ public class CustomerService extends BaseCommunicationService<Customer> {
     } catch (HttpStatusCodeException ex) {
       LOGGER.error("Creating customer using Service Desk API failed: {}",
           ex.getResponseBodyAsString());
-      return null;
+      return ResponseEntity.ok(null);
     }
   }
 

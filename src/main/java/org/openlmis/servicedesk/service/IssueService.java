@@ -91,7 +91,7 @@ public class IssueService {
   }
 
   private ServiceDeskCustomer createNewCustomer(String email, String displayName) {
-    CreatedCustomer customer = customerService.create(new Customer(email, displayName)).getBody();
+    CreatedCustomer customer = customerService.create(new Customer(displayName, email)).getBody();
     if (customer == null) {
       CustomersResponse response = customerService.getServiceDeskCustomers(email).getBody();
       customer = response.findByEmail(email);
