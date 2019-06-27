@@ -64,6 +64,7 @@ public class CustomerRequestService extends BaseCommunicationService<CustomerReq
     } catch (HttpStatusCodeException ex) {
       LOGGER.error("Sending customer request to Service Desk API failed: {}",
           ex.getResponseBodyAsString());
+      LOGGER.error("Exception with http code {}: {}", ex.getStatusCode(), ex);
       throw new ServiceDeskException(ex.getResponseBodyAsString(), ex);
     }
   }
