@@ -26,24 +26,29 @@ public class IssueDtoDataBuilder {
   private ImpactType impact;
   private String email;
   private String displayName;
+  private String username;
+  private String url;
 
   /**
-   * Constructor for {@link IssueDtoDataBuilder}.
-   * Sets default values for new instance of {@link IssueDto} class.
+   * Constructor for {@link IssueDtoDataBuilder}. Sets default values for new instance of {@link
+   * IssueDto} class.
    */
   public IssueDtoDataBuilder() {
     instanceNumber++;
 
     type = IssueType.SUPPORT;
     summary = "summary-" + instanceNumber;
-    description = "description " + instanceNumber;
     priority = PriorityType.LOW;
     impact = ImpactType.LOCAL;
     email = String.format("user%s@siglofa.org", instanceNumber);
     displayName = "User " + instanceNumber;
+    username = "Username " + instanceNumber;
+    url = "Url " + instanceNumber;
+    description = "description" + instanceNumber;
   }
 
   public IssueDto build() {
-    return new IssueDto(type, summary, description, priority, impact, email, displayName);
+    return new IssueDto(type, summary, description, priority, impact, email, displayName, username,
+        url);
   }
 }

@@ -40,7 +40,7 @@ public class CustomerRequestBuilderTest {
       .withRequestTypeId(issueDto.getType().getValue())
       .withRequestFieldValues(new RequestFieldValuesDataBuilder()
           .withSummary(issueDto.getSummary())
-          .withDescription(issueDto.getDescription())
+          .withDescription(getDescriptionWithMetadata())
           .withImpact(new CustomField(issueDto.getImpact().getValue().toString()))
           .withPriority(new CustomField(issueDto.getPriority().getValue().toString()))
           .build())
@@ -55,5 +55,12 @@ public class CustomerRequestBuilderTest {
   @Test
   public void shouldBuildCustomerRequestFromIssueDto() throws Exception {
     assertEquals(customerRequest, customerRequestBuilder.build(issueDto, requestParticipant));
+  }
+
+  private String getDescriptionWithMetadata() {
+    return String
+        .format("%s %n%n[METADATA]%nUsername: %s%nEmail: %s%nURL: %s",
+            issueDto.getDescription(),
+            issueDto.getUsername(), issueDto.getEmail(), issueDto.getUrl());
   }
 }

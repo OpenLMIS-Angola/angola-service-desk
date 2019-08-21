@@ -30,4 +30,6 @@ public final class IssueDto {
   private ImpactType impact;
   private String email;
   private String displayName;
+  private String username;
+  private String url;
 }

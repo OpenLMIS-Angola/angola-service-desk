@@ -38,9 +38,18 @@ public class CustomerRequestBuilder {
         issue.getType().getValue(),
         new RequestFieldValues(
             issue.getSummary(),
-            issue.getDescription(),
+            getRequestDescriptionWithMetadata(issue),
             new CustomField(issue.getImpact().getValue().toString()),
             new CustomField(issue.getPriority().getValue().toString())),
         customerAccountId);
+  }
+
+
+  private String getRequestDescriptionWithMetadata(IssueDto issueDto) {
+    return
+        String
+            .format("%s %n%n[METADATA]%nUsername: %s%nEmail: %s%nURL: %s",
+                issueDto.getDescription(),
+                issueDto.getUsername(), issueDto.getEmail(), issueDto.getUrl());
   }
 }
