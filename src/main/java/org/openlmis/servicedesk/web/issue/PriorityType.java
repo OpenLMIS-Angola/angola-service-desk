@@ -18,7 +18,6 @@ package org.openlmis.servicedesk.web.issue;
 import lombok.Getter;
 
 public enum PriorityType {
-  URGENT(10641),
   HIGH(10642),
   MEDIUM(10643),
   LOW(10644);

@@ -23,7 +23,6 @@
     },
     "priority": {
       "enum": [
-        "URGENT",
         "HIGH",
         "MEDIUM",
         "LOW"
