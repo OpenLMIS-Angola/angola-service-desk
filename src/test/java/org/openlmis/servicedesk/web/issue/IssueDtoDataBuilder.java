@@ -24,10 +24,6 @@ public class IssueDtoDataBuilder {
   private String description;
   private PriorityType priority;
   private ImpactType impact;
-  private String email;
-  private String displayName;
-  private String username;
-  private String url;
 
   /**
    * Constructor for {@link IssueDtoDataBuilder}. Sets default values for new instance of {@link
@@ -40,15 +36,10 @@ public class IssueDtoDataBuilder {
     summary = "summary-" + instanceNumber;
     priority = PriorityType.LOW;
     impact = ImpactType.LOCAL;
-    email = String.format("user%s@siglofa.org", instanceNumber);
-    displayName = "User " + instanceNumber;
-    username = "Username " + instanceNumber;
-    url = "Url " + instanceNumber;
     description = "description" + instanceNumber;
   }
 
   public IssueDto build() {
-    return new IssueDto(type, summary, description, priority, impact, email, displayName, username,
-        url);
+    return new IssueDto(type, summary, description, priority, impact);
   }
 }

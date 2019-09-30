@@ -30,4 +30,8 @@ public class NotFoundException extends BaseMessageException {
   public NotFoundException(String messageKey) {
     super(messageKey);
   }
+
+  public NotFoundException(String messageKey, String... params) {
+    super(messageKey, params);
+  }
 }

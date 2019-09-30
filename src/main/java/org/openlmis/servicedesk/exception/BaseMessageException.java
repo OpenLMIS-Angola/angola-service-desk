@@ -21,6 +21,7 @@ import org.openlmis.servicedesk.util.Message;
  * Base class for exceptions using Message.
  */
 public class BaseMessageException extends RuntimeException {
+
   private final transient Message message;
 
   public BaseMessageException(Message message) {
@@ -34,6 +35,10 @@ public class BaseMessageException extends RuntimeException {
 
   public BaseMessageException(String messageKey) {
     this.message = new Message(messageKey);
+  }
+
+  public BaseMessageException(String messageKey, String... params) {
+    this.message = new Message(messageKey, params);
   }
 
   public Message asMessage() {

@@ -15,22 +15,19 @@
 
 package org.openlmis.servicedesk.util;
 
-import static java.util.Collections.singletonList;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import org.openlmis.servicedesk.exception.EncodingException;
+import org.openlmis.servicedesk.service.RequestHeaders;
 import org.openlmis.servicedesk.service.RequestParameters;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public final class RequestHelper {
 
   private RequestHelper() {
@@ -70,75 +67,109 @@ public final class RequestHelper {
    * Creates an {@link HttpEntity} with the given payload as a body and adds an authorization
    * header with the provided token.
    *
-   * @param payload   the body of the request, pass null if no body
-   * @param token     the token to put into the authorization header
-   * @param <E>       the type of the body for the request
-   * @param multipart if true multipart/form-data header will be set, otherwise application/json
-   * @param headers   additional http headers
-   * @return          the {@link HttpEntity} to use
+   * @param  payload   the body of the request, pass null if no body
+   * @param  token     the token to put into the authorization header
+   * @param  <E>       the type of the body for the request
+   * @param  isBasic   specifies if authorization is Basic or Bearer
+   * @param  multipart if true multipart/form-data header will be set, otherwise application/json
+   * @param  headers   additional http headers
+   * @return           the {@link HttpEntity} to use
    */
-  public static <E> HttpEntity<E> createEntity(E payload, String token, boolean multipart,
-      Map<String, String> headers) {
+  public static <E> HttpEntity<E> createEntity(
+      E payload, String token, boolean isBasic, boolean multipart, RequestHeaders headers) {
+
     if (payload == null) {
-      return createEntity(token);
+      return createEntity(createHeaders(token, isBasic));
     } else {
-      return new HttpEntity<>(payload, createHeadersWithAuth(token, multipart, headers));
+      return createEntity(payload, createHeaders(token, isBasic, multipart, headers));
     }
   }
 
   /**
-   * Creates an {@link HttpEntity} with the given payload as a body and adds an authorization
-   * header with the provided token.
+   * Creates an {@link HttpEntity} with an authorization header with the provided token.
    *
-   * @param payload   the body of the request, pass null if no body
-   * @param token     the token to put into the authorization header
-   * @param <E>       the type of the body for the request
-   * @param multipart if true multipart/form-data header will be set, otherwise application/json
-   * @return          the {@link HttpEntity} to use
+   * @param  token          the token to put into the authorization header
+   * @param  isBasic        is token Basic or Bearer
+   * @param  requestHeaders additional Http headers
+   * @return                the {@link HttpEntity} to use
    */
-  public static <E> HttpEntity<E> createEntity(E payload, String token, boolean multipart) {
-    return createEntity(payload, token, multipart, new HashMap<>());
+  public static <E> HttpEntity<E> createEntity(
+      String token, boolean isBasic, RequestHeaders requestHeaders) {
+    return createEntity(null, createHeaders(token, isBasic, requestHeaders));
+  }
+
+  /**
+   * Creates an {@link HttpEntity} with an authorization header with the provided token.
+   *
+   * @param token the token to put into the authorization header
+   * @param <E> the type of the body for the request
+   * @return the {@link HttpEntity} to use
+   */
+  public static <E> HttpEntity<E> createEntity(String token) {
+    return createEntity(null, createHeaders(token));
   }
 
   /**
    * Creates an {@link HttpEntity} with the given payload as a body and adds an authorization
    * header with the provided token.
    *
-   * @param payload   the body of the request, pass null if no body
-   * @param token     the token to put into the authorization header
-   * @param <E>       the type of the body for the request
-   * @return          the {@link HttpEntity} to use
+   * @param token   true if authorization is basic, bearer otherwise
+   * @param isBasic the token to put into the authorization header
+   * @param payload the body of the request, pass null if no body
+   * @param <E>     the type of the body for the request
+   * @return        the {@link HttpEntity} to use
    */
-  public static <E> HttpEntity<E> createEntity(E payload, String token) {
-    return createEntity(payload, token, false);
+  public static <E> HttpEntity<E> createEntity(E payload, String token, boolean isBasic) {
+    if (payload == null) {
+      return createEntity(createHeaders(token, isBasic));
+    } else {
+      return createEntity(payload, createHeaders(token, isBasic));
+    }
   }
 
-  public static <E> HttpEntity<E> createEntity(String token) {
-    return new HttpEntity<>(createHeadersWithAuth(token));
+  /**
+   * Creates an {@link HttpEntity} with the given payload as a body and headers.
+   */
+  public static <E> HttpEntity<E> createEntity(E payload, RequestHeaders headers) {
+    return new HttpEntity<>(payload, headers.toHeaders());
   }
 
-  public static <E> HttpEntity<E> createEntity(String token, Map<String, String> headers) {
-    return new HttpEntity<>(createHeadersWithAuth(token, headers));
+  /**
+   * Creates an {@link HttpEntity} with the given headers.
+   */
+  public static <E> HttpEntity<E> createEntity(RequestHeaders headers) {
+    return new HttpEntity<>(headers.toHeaders());
   }
 
-  private static HttpHeaders createHeadersWithAuth(String credentials, boolean multipart,
-      Map<String, String> requestHeaders) {
-    HttpHeaders headers = new HttpHeaders();
-    MediaType type = multipart ? MediaType.MULTIPART_FORM_DATA : MediaType.APPLICATION_JSON;
-    headers.setContentType(type);
-    headers.setAccept(singletonList(MediaType.APPLICATION_JSON));
-    requestHeaders.forEach(headers::add);
-    String encodedString = Base64.getEncoder().encodeToString(credentials.getBytes());
-    headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedString);
-    return headers;
+  /**
+   * Encodes credentials to token using base64 encoding.
+   *
+   * @param  credentials username and password separated by ":"
+   * @return             encoded token
+   */
+  public static String encodeToken(String credentials) {
+    return Base64.getEncoder().encodeToString(credentials.getBytes());
   }
 
-  private static HttpHeaders createHeadersWithAuth(String credentials) {
-    return createHeadersWithAuth(credentials, false, new HashMap<>());
+  private static RequestHeaders createHeaders(String token) {
+    return createHeaders(token, false);
   }
 
-  private static HttpHeaders createHeadersWithAuth(
-      String credentials, Map<String, String> headers) {
-    return createHeadersWithAuth(credentials, false, headers);
+  private static RequestHeaders createHeaders(String token, boolean isBasicAuth) {
+    return createHeaders(token, isBasicAuth, false, null);
+  }
+
+  private static RequestHeaders createHeaders(
+      String token, boolean isBasicAuth, RequestHeaders requestHeaders) {
+    return createHeaders(token, isBasicAuth, false, requestHeaders);
+  }
+
+  private static RequestHeaders createHeaders(
+      String token, boolean isBasicAuth, boolean isMultipart, RequestHeaders requestHeaders) {
+
+    return (requestHeaders == null ? RequestHeaders.init() : requestHeaders)
+        .setAuth(token, isBasicAuth)
+        .setContentType(isMultipart ? MediaType.MULTIPART_FORM_DATA : MediaType.APPLICATION_JSON)
+        .addAccept(MediaType.APPLICATION_JSON);
   }
 }

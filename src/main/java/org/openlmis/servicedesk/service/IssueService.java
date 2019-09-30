@@ -15,20 +15,28 @@
 
 package org.openlmis.servicedesk.service;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.openlmis.servicedesk.i18n.MessageKeys.CANNOT_FIND_AND_CREATE_CUSTOMER_WITH_EMAIL;
+
 import org.openlmis.servicedesk.domain.ServiceDeskCustomer;
+import org.openlmis.servicedesk.exception.ValidationMessageException;
 import org.openlmis.servicedesk.reporitory.ServiceDeskCustomerRepository;
-import org.openlmis.servicedesk.service.servicedesk.attachment.AttachmentRequest;
-import org.openlmis.servicedesk.service.servicedesk.attachment.AttachmentService;
-import org.openlmis.servicedesk.service.servicedesk.attachment.TemporaryAttachmentResponse;
-import org.openlmis.servicedesk.service.servicedesk.customer.AddCustomersRequest;
-import org.openlmis.servicedesk.service.servicedesk.customer.CreatedCustomer;
-import org.openlmis.servicedesk.service.servicedesk.customer.Customer;
-import org.openlmis.servicedesk.service.servicedesk.customer.CustomerService;
-import org.openlmis.servicedesk.service.servicedesk.customer.CustomersResponse;
-import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequest;
-import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequestBuilder;
-import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequestResponse;
-import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequestService;
+import org.openlmis.servicedesk.security.AuthenticationHelper;
+import org.openlmis.servicedesk.service.jiraservicedesk.attachment.AttachmentRequest;
+import org.openlmis.servicedesk.service.jiraservicedesk.attachment.AttachmentService;
+import org.openlmis.servicedesk.service.jiraservicedesk.attachment.TemporaryAttachmentResponse;
+import org.openlmis.servicedesk.service.jiraservicedesk.customer.AddCustomersRequest;
+import org.openlmis.servicedesk.service.jiraservicedesk.customer.CreatedCustomer;
+import org.openlmis.servicedesk.service.jiraservicedesk.customer.Customer;
+import org.openlmis.servicedesk.service.jiraservicedesk.customer.CustomerService;
+import org.openlmis.servicedesk.service.jiraservicedesk.customer.CustomersResponse;
+import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequest;
+import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequestBuilder;
+import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequestResponse;
+import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequestService;
+import org.openlmis.servicedesk.service.notification.UserContactDetailsDto;
+import org.openlmis.servicedesk.service.referencedata.UserDto;
+import org.openlmis.servicedesk.util.Message;
 import org.openlmis.servicedesk.web.issue.IssueDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +60,9 @@ public class IssueService {
   @Autowired
   private AttachmentService attachmentService;
 
+  @Autowired
+  private AuthenticationHelper authenticationHelper;
+
   /**
    * Creates Service Desk customer request from issue send by user.
    *
@@ -59,11 +70,20 @@ public class IssueService {
    * @return       request ready to send to Service Desk
    */
   public CustomerRequest prepareCustomerRequest(IssueDto issue) {
-    ServiceDeskCustomer customer = serviceDeskCustomerRepository
-        .findByEmail(issue.getEmail())
-        .orElseGet(() -> createNewCustomer(issue.getEmail(), issue.getDisplayName()));
+    UserDto user = authenticationHelper.getCurrentUser();
+    UserContactDetailsDto userContactDetails = authenticationHelper.getCurrentUserContactDetails();
 
-    return customerRequestBuilder.build(issue, customer == null ? null : customer.getCustomerId());
+    String email = userContactDetails.getEmailDetails().getEmail();
+
+    ServiceDeskCustomer customer = serviceDeskCustomerRepository
+        .findByEmail(userContactDetails.getEmailDetails().getEmail())
+        .orElseGet(() -> createNewCustomer(email, user.getDisplayName()));
+
+    return customerRequestBuilder.build(
+        issue,
+        customer == null ? null : customer.getCustomerId(),
+        email,
+        user.getUsername());
   }
 
   /**
@@ -97,8 +117,12 @@ public class IssueService {
 
     CreatedCustomer customer = customerService.create(new Customer(displayName, email)).getBody();
     if (customer == null) {
-      CustomersResponse response = customerService.getServiceDeskCustomers(email).getBody();
-      customer = response.findByEmail(email);
+      CustomersResponse customers = customerService.getServiceDeskCustomers(email).getBody();
+      if (isEmpty(customers.getValues())) {
+        throw new ValidationMessageException(
+            new Message(CANNOT_FIND_AND_CREATE_CUSTOMER_WITH_EMAIL, email));
+      }
+      customer = customers.getValues().get(0);
     } else {
       customerService.addToServiceDesk(new AddCustomersRequest(customer.getEmailAddress()));
     }

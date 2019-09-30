@@ -15,6 +15,7 @@
 
 package org.openlmis.servicedesk.errorhandling;
 
+import org.openlmis.servicedesk.exception.DataRetrievalException;
 import org.openlmis.servicedesk.exception.NotFoundException;
 import org.openlmis.servicedesk.exception.ServiceDeskException;
 import org.openlmis.servicedesk.exception.ValidationMessageException;
@@ -61,13 +62,26 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
   /**
    * Handles Message exceptions and returns status 500.
    *
-   * @param ex the DataRetrievalException to handle
+   * @param ex the ServiceDeskException to handle
    * @return the error response for the user
    */
   @ExceptionHandler(ServiceDeskException.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public String handleServiceDeskException(ServiceDeskException ex) {
+    return ex.getMessage();
+  }
+
+  /**
+   * Handles Message exceptions and returns status 500.
+   *
+   * @param ex the DataRetrievalException to handle
+   * @return the error response for the user
+   */
+  @ExceptionHandler(DataRetrievalException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  public String handleDataRetrievalException(DataRetrievalException ex) {
     return ex.getMessage();
   }
 }

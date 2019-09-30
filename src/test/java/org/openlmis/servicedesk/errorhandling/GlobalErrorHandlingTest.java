@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.servicedesk.exception.DataRetrievalException;
 import org.openlmis.servicedesk.exception.NotFoundException;
 import org.openlmis.servicedesk.exception.ServiceDeskException;
 import org.openlmis.servicedesk.exception.ValidationMessageException;
@@ -33,6 +34,7 @@ import org.openlmis.servicedesk.i18n.MessageService;
 import org.openlmis.servicedesk.util.Message;
 import org.openlmis.servicedesk.util.Message.LocalizedMessage;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GlobalErrorHandlingTest {
@@ -60,30 +62,35 @@ public class GlobalErrorHandlingTest {
 
   @Test
   public void shouldHandleMessageException() {
-    // given
     String messageKey = "key";
     ValidationMessageException exp = new ValidationMessageException(messageKey);
 
-    // when
     mockMessage(messageKey);
     LocalizedMessage message = errorHandler.handleMessageException(exp);
 
-    // then
     assertMessage(message, messageKey);
   }
 
   @Test
   public void shouldHandleNotFoundException() {
-    // given
     String messageKey = "key";
     NotFoundException exp = new NotFoundException(messageKey);
 
-    // when
     mockMessage(messageKey);
     LocalizedMessage message = errorHandler.handleNotFoundException(exp);
 
-    // then
     assertMessage(message, messageKey);
+  }
+
+  @Test
+  public void shouldHandleDataRetrievalException() {
+    DataRetrievalException exp =
+        new DataRetrievalException("someResource", HttpStatus.NOT_FOUND, "cannot find");
+
+    assertThat(errorHandler.handleDataRetrievalException(exp))
+        .isEqualTo(String.format(
+            "Unable to retrieve %s. Error code: %s, response message: %s",
+            exp.getResource(), exp.getStatus(), exp.getResponse()));
   }
 
   @Test

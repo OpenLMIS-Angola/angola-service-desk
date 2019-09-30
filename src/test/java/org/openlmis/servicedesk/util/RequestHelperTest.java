@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.net.URI;
-import java.util.Base64;
 import org.junit.Test;
 import org.openlmis.servicedesk.service.RequestParameters;
 import org.springframework.http.HttpEntity;
@@ -56,13 +55,12 @@ public class RequestHelperTest {
   }
 
   @Test
-  public void shouldCreateEntity() {
+  public void shouldCreateEntityWithBearerToken() {
     String token = "token";
-    String encodedString = Base64.getEncoder().encodeToString(token.getBytes());
 
     HttpEntity entity = RequestHelper.createEntity(token);
 
     assertThat(entity.getHeaders().get(HttpHeaders.AUTHORIZATION),
-            is(singletonList("Basic " + encodedString)));
+        is(singletonList("Bearer " + token)));
   }
 }

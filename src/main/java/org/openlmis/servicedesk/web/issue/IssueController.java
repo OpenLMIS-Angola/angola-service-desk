@@ -16,8 +16,8 @@
 package org.openlmis.servicedesk.web.issue;
 
 import org.openlmis.servicedesk.service.IssueService;
-import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequest;
-import org.openlmis.servicedesk.service.servicedesk.customerrequest.CustomerRequestResponse;
+import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequest;
+import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
