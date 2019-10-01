@@ -16,7 +16,9 @@
 package org.openlmis.servicedesk.service;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.openlmis.servicedesk.i18n.MessageKeys.CANNOT_FIND_AND_CREATE_CUSTOMER_WITH_EMAIL;
+import static org.openlmis.servicedesk.i18n.MessageKeys.CURRENT_USER_HAS_NO_EMAIL;
 
 import org.openlmis.servicedesk.domain.ServiceDeskCustomer;
 import org.openlmis.servicedesk.exception.ValidationMessageException;
@@ -74,6 +76,9 @@ public class IssueService {
     UserContactDetailsDto userContactDetails = authenticationHelper.getCurrentUserContactDetails();
 
     String email = userContactDetails.getEmailDetails().getEmail();
+    if (isBlank(email)) {
+      throw new ValidationMessageException(CURRENT_USER_HAS_NO_EMAIL);
+    }
 
     ServiceDeskCustomer customer = serviceDeskCustomerRepository
         .findByEmail(userContactDetails.getEmailDetails().getEmail())
@@ -124,7 +129,7 @@ public class IssueService {
       }
       customer = customers.getValues().get(0);
     } else {
-      customerService.addToServiceDesk(new AddCustomersRequest(customer.getEmailAddress()));
+      customerService.addToServiceDesk(new AddCustomersRequest(customer.getAccountId()));
     }
     return serviceDeskCustomerRepository.save(
         new ServiceDeskCustomer(customer.getEmailAddress(), customer.getAccountId()));

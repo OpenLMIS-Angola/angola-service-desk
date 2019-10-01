@@ -34,6 +34,8 @@ public abstract class MessageKeys {
 
   public static final String USER_CONTACT_DETAILS_NOT_FOUND =
       join(ERROR_PREFIX, AUTHENTICATION, "userContactDetails", NOT_FOUND);
+  public static final String CURRENT_USER_HAS_NO_EMAIL =
+      join(ERROR_PREFIX, "currentUser", "hasNoEmail");
 
   public static final String ATTACHMENT_FAILED_TO_READ =
       join(ERROR_PREFIX, ATTACHMENT, "failedToRead");

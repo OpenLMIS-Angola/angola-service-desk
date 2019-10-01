@@ -23,6 +23,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.servicedesk.i18n.MessageKeys.CANNOT_FIND_AND_CREATE_CUSTOMER_WITH_EMAIL;
+import static org.openlmis.servicedesk.i18n.MessageKeys.CURRENT_USER_HAS_NO_EMAIL;
 
 import java.util.Optional;
 import org.junit.Before;
@@ -160,6 +161,16 @@ public class IssueServiceTest {
     when(customerService.create(anyObject())).thenReturn(ResponseEntity.badRequest().build());
     when(customerService.getServiceDeskCustomers(email)).thenReturn(ResponseEntity.ok(
         new CustomersResponseDataBuilder().withEmptyCustomers().build()));
+
+    issueService.prepareCustomerRequest(issue);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfUserHasNoEmail() {
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(new Message(CURRENT_USER_HAS_NO_EMAIL).toString());
+
+    userContactDetails.getEmailDetails().setEmail(null);
 
     issueService.prepareCustomerRequest(issue);
   }
