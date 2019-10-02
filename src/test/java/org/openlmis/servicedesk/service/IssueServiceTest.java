@@ -31,6 +31,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -44,9 +46,9 @@ import org.openlmis.servicedesk.service.jiraservicedesk.attachment.AttachmentSer
 import org.openlmis.servicedesk.service.jiraservicedesk.attachment.TemporaryAttachmentDataBuilder;
 import org.openlmis.servicedesk.service.jiraservicedesk.attachment.TemporaryAttachmentResponse;
 import org.openlmis.servicedesk.service.jiraservicedesk.attachment.TemporaryAttachmentResponseDataBuilder;
-import org.openlmis.servicedesk.service.jiraservicedesk.customer.CreatedCustomer;
 import org.openlmis.servicedesk.service.jiraservicedesk.customer.CreatedCustomerDataBuilder;
 import org.openlmis.servicedesk.service.jiraservicedesk.customer.CustomerService;
+import org.openlmis.servicedesk.service.jiraservicedesk.customer.CustomersResponse;
 import org.openlmis.servicedesk.service.jiraservicedesk.customer.CustomersResponseDataBuilder;
 import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequest;
 import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequestBuilder;
@@ -87,6 +89,9 @@ public class IssueServiceTest {
 
   @Mock
   private AuthenticationHelper authenticationHelper;
+
+  @Captor
+  private ArgumentCaptor<ServiceDeskCustomer> customerCaptor;
 
   @InjectMocks
   private IssueService issueService;
@@ -141,14 +146,14 @@ public class IssueServiceTest {
     when(serviceDeskCustomerRepository.findByEmail(email)).thenReturn(Optional.empty());
     when(customerService.create(anyObject())).thenReturn(ResponseEntity.badRequest().build());
 
-    CreatedCustomer createdCustomer = new CreatedCustomerDataBuilder()
-        .withEmailAddress(userContactDetails.getEmailDetails().getEmail())
-        .build();
-    when(customerService.getServiceDeskCustomers(email)).thenReturn(ResponseEntity.ok(
-        new CustomersResponseDataBuilder().withCreatedCustomer(createdCustomer).build()));
+    CustomersResponse response = new CustomersResponseDataBuilder().build();
+    when(customerService.getServiceDeskCustomers(email)).thenReturn(ResponseEntity.ok(response));
 
     assertThat(issueService.prepareCustomerRequest(issue), is(customerRequest));
-    verify(serviceDeskCustomerRepository).save(any(ServiceDeskCustomer.class));
+    verify(serviceDeskCustomerRepository).save(customerCaptor.capture());
+    assertThat(customerCaptor.getValue().getEmail(), is(email));
+    assertThat(customerCaptor.getValue().getCustomerId(),
+        is(response.getValues().get(0).getAccountId()));
   }
 
   @Test

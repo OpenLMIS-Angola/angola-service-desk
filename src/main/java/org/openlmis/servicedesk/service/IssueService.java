@@ -81,7 +81,7 @@ public class IssueService {
     }
 
     ServiceDeskCustomer customer = serviceDeskCustomerRepository
-        .findByEmail(userContactDetails.getEmailDetails().getEmail())
+        .findByEmail(email)
         .orElseGet(() -> createNewCustomer(email, user.getDisplayName()));
 
     return customerRequestBuilder.build(
@@ -128,6 +128,7 @@ public class IssueService {
             new Message(CANNOT_FIND_AND_CREATE_CUSTOMER_WITH_EMAIL, email));
       }
       customer = customers.getValues().get(0);
+      customer.setEmailAddress(email);
     } else {
       customerService.addToServiceDesk(new AddCustomersRequest(customer.getAccountId()));
     }
