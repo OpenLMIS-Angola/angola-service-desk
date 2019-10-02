@@ -36,7 +36,7 @@ public class CustomerRequestBuilder {
    * @return                   customer request ready to send to Service Desk API
    */
   public CustomerRequest build(
-      IssueDto issue, String customerAccountId, String username, String email) {
+      IssueDto issue, String customerAccountId, String email, String username) {
 
     return new CustomerRequest(
         serviceDeskId,

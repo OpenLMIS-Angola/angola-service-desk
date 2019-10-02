@@ -47,7 +47,6 @@ dependencies {
     compile 'org.openlmis:openlmis-service-util:3.1.0'
     compile 'org.webjars.npm:api-console:3.0.17'
     compile 'org.flywaydb:flyway-core:4.1.2'
-    compile 'com.google.guava:guava:23.3-jre'
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"

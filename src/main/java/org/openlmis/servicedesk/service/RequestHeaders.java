@@ -17,8 +17,8 @@ package org.openlmis.servicedesk.service;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -27,7 +27,7 @@ import org.springframework.http.MediaType;
 
 public final class RequestHeaders {
 
-  private Map<String, String> headers = Maps.newHashMap();
+  private Map<String, String> headers = new HashMap<>();
   private MediaType contentType;
   private List<MediaType> accept = new ArrayList<>();
 

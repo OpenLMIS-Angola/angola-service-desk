@@ -59,7 +59,7 @@ public class CustomerRequestBuilderTest {
   @Test
   public void shouldBuildCustomerRequestFromIssueDto() {
     assertEquals(customerRequest,
-        customerRequestBuilder.build(issueDto, requestParticipant, username, email));
+        customerRequestBuilder.build(issueDto, requestParticipant, email, username));
   }
 
   private String getDescriptionWithMetadata() {
