@@ -37,6 +37,10 @@ public class ServiceDeskCustomerDataBuilder {
     customerId = "customer" + instanceNumber;
   }
 
+  public ServiceDeskCustomerDataBuilder withEmail(String email) {
+    this.email = email;
+    return this;
+  }
   /**
    * Builds {@link ServiceDeskCustomer} object from builder parameters.
    *

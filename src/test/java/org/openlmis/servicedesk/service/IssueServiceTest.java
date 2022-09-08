@@ -23,7 +23,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.servicedesk.i18n.MessageKeys.CANNOT_FIND_AND_CREATE_CUSTOMER_WITH_EMAIL;
-import static org.openlmis.servicedesk.i18n.MessageKeys.CURRENT_USER_HAS_NO_EMAIL;
 
 import java.util.Optional;
 import org.junit.Before;
@@ -35,7 +34,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.servicedesk.domain.ServiceDeskCustomer;
 import org.openlmis.servicedesk.domain.ServiceDeskCustomerDataBuilder;
@@ -177,10 +175,15 @@ public class IssueServiceTest {
 
   @Test
   public void shouldUseAdminsEmailIfUserHasNoEmail() {
+    ReflectionTestUtils.setField(issueService, "userEmail", userEmail );
     userContactDetails.getEmailDetails().setEmail(null);
+
+    when(serviceDeskCustomerRepository.findByEmail(userEmail))
+        .thenReturn(Optional.of(new ServiceDeskCustomerDataBuilder().withEmail(userEmail).build()));
+
     issueService.prepareCustomerRequest(issue);
 
-    verify(issueService, Mockito.times(1)).prepareCustomerRequest(issue);
+    verify(customerRequestBuilder).build(any(), any(), eq(userEmail), eq(user.getUsername()));
   }
 
   @Test
