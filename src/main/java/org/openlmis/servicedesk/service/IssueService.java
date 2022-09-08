@@ -18,7 +18,6 @@ package org.openlmis.servicedesk.service;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.openlmis.servicedesk.i18n.MessageKeys.CANNOT_FIND_AND_CREATE_CUSTOMER_WITH_EMAIL;
-import static org.openlmis.servicedesk.i18n.MessageKeys.CURRENT_USER_HAS_NO_EMAIL;
 
 import org.openlmis.servicedesk.domain.ServiceDeskCustomer;
 import org.openlmis.servicedesk.exception.ValidationMessageException;
@@ -36,11 +35,13 @@ import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.Customer
 import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequestBuilder;
 import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequestResponse;
 import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequestService;
+import org.openlmis.servicedesk.service.notification.EmailDetailsDto;
 import org.openlmis.servicedesk.service.notification.UserContactDetailsDto;
 import org.openlmis.servicedesk.service.referencedata.UserDto;
 import org.openlmis.servicedesk.util.Message;
 import org.openlmis.servicedesk.web.issue.IssueDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -65,6 +66,9 @@ public class IssueService {
   @Autowired
   private AuthenticationHelper authenticationHelper;
 
+  @Value("${serviceDeskApi.userEmail}")
+  private String userEmail;
+
   /**
    * Creates Service Desk customer request from issue send by user.
    *
@@ -72,13 +76,11 @@ public class IssueService {
    * @return       request ready to send to Service Desk
    */
   public CustomerRequest prepareCustomerRequest(IssueDto issue) {
-    UserDto user = authenticationHelper.getCurrentUser();
-    UserContactDetailsDto userContactDetails = authenticationHelper.getCurrentUserContactDetails();
+    final UserDto user = authenticationHelper.getCurrentUser();
+    final UserContactDetailsDto userContactDetails = authenticationHelper.getCurrentUserContactDetails();
 
-    String email = userContactDetails.getEmailDetails().getEmail();
-    if (isBlank(email)) {
-      throw new ValidationMessageException(CURRENT_USER_HAS_NO_EMAIL);
-    }
+    final EmailDetailsDto emailDetails = userContactDetails.getEmailDetails();
+    final String email = isBlank(emailDetails.getEmail()) ? userEmail : emailDetails.getEmail();
 
     ServiceDeskCustomer customer = serviceDeskCustomerRepository
         .findByEmail(email)

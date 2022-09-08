@@ -35,6 +35,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.servicedesk.domain.ServiceDeskCustomer;
 import org.openlmis.servicedesk.domain.ServiceDeskCustomerDataBuilder;
@@ -65,10 +66,12 @@ import org.openlmis.servicedesk.web.issue.IssueDto;
 import org.openlmis.servicedesk.web.issue.IssueDtoDataBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueServiceTest {
 
+  private static final String userEmail = "user@siglofa.com";
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
 
@@ -119,6 +122,8 @@ public class IssueServiceTest {
         eq(email),
         eq(user.getUsername())))
         .thenReturn(customerRequest);
+
+    ReflectionTestUtils.setField(issueService, "userEmail", userEmail );
   }
 
   @Test
@@ -171,13 +176,11 @@ public class IssueServiceTest {
   }
 
   @Test
-  public void shouldThrowExceptionIfUserHasNoEmail() {
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(new Message(CURRENT_USER_HAS_NO_EMAIL).toString());
-
+  public void shouldUseAdminsEmailIfUserHasNoEmail() {
     userContactDetails.getEmailDetails().setEmail(null);
-
     issueService.prepareCustomerRequest(issue);
+
+    verify(issueService, Mockito.times(1)).prepareCustomerRequest(issue);
   }
 
   @Test

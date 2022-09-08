@@ -47,6 +47,7 @@ dependencies {
     compile 'org.openlmis:openlmis-service-util:3.1.0'
     compile 'org.webjars.npm:api-console:3.0.17'
     compile 'org.flywaydb:flyway-core:4.1.2'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"
@@ -62,6 +63,7 @@ dependencies {
 
     testCompile "nl.jqno.equalsverifier:equalsverifier:2.4"
     testCompile "be.joengenduvel.java.verifiers:to-string:1.0.2"
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
 }
 
 idea {
@@ -166,7 +168,7 @@ jacocoTestReport {
         csv.enabled false
     }
 
-    additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
+    additionalSourceDirs(files(sourceSets.main.allJava.srcDirs))
 }
 
 checkstyle {
