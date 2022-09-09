@@ -178,7 +178,8 @@ public class IssueServiceTest {
     userContactDetails.getEmailDetails().setEmail(null);
 
     when(serviceDeskCustomerRepository.findByEmail(ADMIN_EMAIL))
-        .thenReturn(Optional.of(new ServiceDeskCustomerDataBuilder().withEmail(ADMIN_EMAIL).build()));
+        .thenReturn(Optional.of(new ServiceDeskCustomerDataBuilder()
+            .withEmail(ADMIN_EMAIL).build()));
 
     issueService.prepareCustomerRequest(issue);
 
