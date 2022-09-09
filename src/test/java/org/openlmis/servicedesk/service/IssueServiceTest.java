@@ -69,7 +69,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class IssueServiceTest {
 
-  private static final String userEmail = "user@siglofa.com";
   @Rule
   public final ExpectedException expectedException = ExpectedException.none();
 
@@ -97,6 +96,8 @@ public class IssueServiceTest {
   @InjectMocks
   private IssueService issueService;
 
+  private static final String ADMIN_EMAIL = "user@siglofa.com";
+
   private UserDto user = new UserDtoDataBuilder().build();
   private UserContactDetailsDto userContactDetails = new UserContactDetailsDtoDataBuilder()
       .withReferenceDataUserId(user.getId())
@@ -120,8 +121,6 @@ public class IssueServiceTest {
         eq(email),
         eq(user.getUsername())))
         .thenReturn(customerRequest);
-
-    ReflectionTestUtils.setField(issueService, "userEmail", userEmail );
   }
 
   @Test
@@ -175,15 +174,15 @@ public class IssueServiceTest {
 
   @Test
   public void shouldUseAdminsEmailIfUserHasNoEmail() {
-    ReflectionTestUtils.setField(issueService, "userEmail", userEmail );
+    ReflectionTestUtils.setField(issueService, "userEmail", ADMIN_EMAIL);
     userContactDetails.getEmailDetails().setEmail(null);
 
-    when(serviceDeskCustomerRepository.findByEmail(userEmail))
-        .thenReturn(Optional.of(new ServiceDeskCustomerDataBuilder().withEmail(userEmail).build()));
+    when(serviceDeskCustomerRepository.findByEmail(ADMIN_EMAIL))
+        .thenReturn(Optional.of(new ServiceDeskCustomerDataBuilder().withEmail(ADMIN_EMAIL).build()));
 
     issueService.prepareCustomerRequest(issue);
 
-    verify(customerRequestBuilder).build(any(), any(), eq(userEmail), eq(user.getUsername()));
+    verify(customerRequestBuilder).build(any(), any(), eq(ADMIN_EMAIL), eq(user.getUsername()));
   }
 
   @Test

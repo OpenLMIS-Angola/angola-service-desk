@@ -41,6 +41,7 @@ public class ServiceDeskCustomerDataBuilder {
     this.email = email;
     return this;
   }
+
   /**
    * Builds {@link ServiceDeskCustomer} object from builder parameters.
    *
