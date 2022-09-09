@@ -23,7 +23,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.servicedesk.i18n.MessageKeys.CANNOT_FIND_AND_CREATE_CUSTOMER_WITH_EMAIL;
-import static org.openlmis.servicedesk.i18n.MessageKeys.CURRENT_USER_HAS_NO_EMAIL;
 
 import java.util.Optional;
 import org.junit.Before;
@@ -65,6 +64,7 @@ import org.openlmis.servicedesk.web.issue.IssueDto;
 import org.openlmis.servicedesk.web.issue.IssueDtoDataBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueServiceTest {
@@ -95,6 +95,8 @@ public class IssueServiceTest {
 
   @InjectMocks
   private IssueService issueService;
+
+  private static final String ADMIN_EMAIL = "user@siglofa.com";
 
   private UserDto user = new UserDtoDataBuilder().build();
   private UserContactDetailsDto userContactDetails = new UserContactDetailsDtoDataBuilder()
@@ -171,13 +173,16 @@ public class IssueServiceTest {
   }
 
   @Test
-  public void shouldThrowExceptionIfUserHasNoEmail() {
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(new Message(CURRENT_USER_HAS_NO_EMAIL).toString());
-
+  public void shouldUseAdminsEmailIfUserHasNoEmail() {
+    ReflectionTestUtils.setField(issueService, "userEmail", ADMIN_EMAIL);
     userContactDetails.getEmailDetails().setEmail(null);
 
+    when(serviceDeskCustomerRepository.findByEmail(ADMIN_EMAIL))
+        .thenReturn(Optional.of(new ServiceDeskCustomerDataBuilder().withEmail(ADMIN_EMAIL).build()));
+
     issueService.prepareCustomerRequest(issue);
+
+    verify(customerRequestBuilder).build(any(), any(), eq(ADMIN_EMAIL), eq(user.getUsername()));
   }
 
   @Test
