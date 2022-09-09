@@ -77,7 +77,8 @@ public class IssueService {
    */
   public CustomerRequest prepareCustomerRequest(IssueDto issue) {
     final UserDto user = authenticationHelper.getCurrentUser();
-    final UserContactDetailsDto userContactDetails = authenticationHelper.getCurrentUserContactDetails();
+    final UserContactDetailsDto userContactDetails = authenticationHelper
+        .getCurrentUserContactDetails();
 
     final EmailDetailsDto emailDetails = userContactDetails.getEmailDetails();
     final String email = isBlank(emailDetails.getEmail()) ? userEmail : emailDetails.getEmail();
