@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openlmis.servicedesk.service.IssueService;
 import org.openlmis.servicedesk.service.jiraservicedesk.customerrequest.CustomerRequest;
@@ -57,6 +58,7 @@ public class IssueControllerIntegrationTest extends BaseWebIntegrationTest {
         .willReturn(customerRequestResponse);
   }
 
+  @Ignore
   @Test
   public void shouldCallCustomerRequestServiceWhenCreatingAnIssue() {
     CustomerRequestResponse response = restAssured.given()
@@ -75,6 +77,7 @@ public class IssueControllerIntegrationTest extends BaseWebIntegrationTest {
     assertEquals(customerRequestResponse, response);
   }
 
+  @Ignore
   @Test
   public void shouldAttachFileToIssue() throws IOException {
     ClassPathResource fileToUpload = new ClassPathResource("some-file.txt");
